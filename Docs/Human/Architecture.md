@@ -174,18 +174,18 @@ Engine/
 ```
 
 #### Fancy words
-Arena refers to a large pre-allocated block of memory that you "carve" smaller peice out of.
+Arena refers to a large pre-allocated block of memory that you "carve" smaller peice out of. -> only use `malloc` ONCE! (fuck malloc, it's too slow)
 
-orginal arena:
-`[----------------------------------------------------------------------] (100 bytes)`
+orginal arena:  
+`[---------------------------------------------] (100 bytes)`  
 `^ offset = 0`
 
-Add some data:
-[Transform (16b) |-----------------------------------------------------] (100 bytes)`
+Add some data:  
+`[Transform (16b) |-----------------------------] (100 bytes)`    
 `^ offset = 16`
 
-Add some more data, it'll look like this:
-`[Transform (16b) | Sprite (4b) |---------------------------------------] (100 bytes)`
+Add some more data, it'll look like this:  
+`[Transform (16b) | Sprite (4b) |--------------] (100 bytes)`    
 `^ offset = 20`
 
 The offset is being kept manually.
@@ -203,43 +203,5 @@ Prolly only check around the certain entity
 
 #### Variable Timestep Physics (There's pros and cons)
 // LOCK TO 30fps or something
-decoupling physics speed from the framerate entirely (?) MAYBE NOT A GOOD IDEA
-Anyhow, maybe
-
-You never say: "Move the bullet 5 pixels per frame." 
-You say: "Move the bullet 150 pixels per SECOND."
-
-My brain hurts, check the following code.
-
-```c
-
-// Inside your main loop
-while (engine_is_running) {
-    // 1. Read the exact hardware stopwatch
-    float dt = get_time_since_last_frame_in_seconds(); // Usually around 0.033 seconds
-    
-    // 2. Pass THAT EXACT TIME to your systems
-    system_physics_update(dt);
-    
-    // 3. Render
-    system_render_draw();
-}
-
-void system_physics_update(float dt) {
-    for (int i = 0; i < MAX_ENTITIES; i++) {
-        if (is_active[i]) {
-            // Speed = 150 pixels per real-world second.
-            // If the PSP lags really badly and dt = 0.5 seconds (half a second)
-            // The bullet will teleport exactly 75 pixels instantly! 
-            
-            transforms[i].x += (velocities[i].x * dt); 
-        }
-    }
-}
-
-```
-
-
-
-
-
+decoupling physics speed from the framerate ?entirely (?) MAYBE NOT A GOOD IDEA
+Anyhow, maybe?
