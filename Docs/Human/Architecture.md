@@ -66,6 +66,8 @@ Actions allowed to be call:
 }
 ```
 
+### PROCESSING THE DATA
+Write a script to compile the json file into binary files and let the psp engine fread() the binary blob directly into the arrays in one operation.
 
 ## Engine - C and static
 As the job over here is to provide the "lego bricks" that games can be built upon of, we can split different attributes into different "components".
@@ -162,7 +164,7 @@ Engine/
 │   │   ├── render.c         # Pushes Sprite/Transform data to the PSP's libgu
 │   │   └── audio.c          # Plays hardware audio channels
 │   └── loaders/
-│       ├── scene_parser.c   # Parses the scene.json 
+│       ├── scene_parser.c   # Parses the binary scene file
 │       └── asset_loader.c   # Loads textures/audio into the arrays defined in the Asset Manifest
 ├── include/                 # Public headers
 ├── vendor/                  # Third-party libs (e.g., cJSON for parsing parsing the Editor's output)
@@ -171,8 +173,23 @@ Engine/
 ```
 
 
+
+### THINGS TO KEEP IN MIND
+
+#### Asset Loading & Memory Management will blow up
+Best approach: Pack all assets into a virtually mounted archive file (like a .zip or a custom .pak). For audio, stream background music directly from the disc (.at3 or mp3) via a separate thread, rather than loading it all into memory. Only load small sound effects into RAM.
+
+#### Naïve ECS Mapping
+Best approach: Sparse Sets or Archetypes. If that is too complex for V1.0, at least maintain a dense array of active components and map them back to the Entity ID, rather than using the Entity ID as the direct array index.
+
+#### Collision Detection
+Prolly only check around the certain entity
+
+#### Variable Timestep Physics (There's pros and cons)
 // LOCK TO 30fps or something
-decoupling physics speed from the framerate entirely
+decoupling physics speed from the framerate entirely (?) MAYBE NOT A GOOD IDEA
+Anyhow, maybe
+
 You never say: "Move the bullet 5 pixels per frame." 
 You say: "Move the bullet 150 pixels per SECOND."
 
