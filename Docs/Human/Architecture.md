@@ -100,6 +100,7 @@ And there's also the functions that can be applied to the components:
 ```c
 /*
 input: int* component_id
+  Essentially a list of stuff that should check for collision
 output: boolean of whether the items in this list collides
 
 Notes: Does not really change anything
