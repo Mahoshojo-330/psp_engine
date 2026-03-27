@@ -173,7 +173,22 @@ Engine/
 
 ```
 
+#### Fancy words
+Arena refers to a large pre-allocated block of memory that you "carve" smaller peice out of.
 
+orginal arena:
+`[----------------------------------------------------------------------] (100 bytes)`
+`^ offset = 0`
+
+Add some data:
+[Transform (16b) |-----------------------------------------------------] (100 bytes)`
+`^ offset = 16`
+
+Add some more data, it'll look like this:
+`[Transform (16b) | Sprite (4b) |---------------------------------------] (100 bytes)`
+`^ offset = 20`
+
+The offset is being kept manually.
 
 ### THINGS TO KEEP IN MIND
 
