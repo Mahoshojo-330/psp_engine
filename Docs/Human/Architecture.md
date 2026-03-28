@@ -1,12 +1,14 @@
 # Architecture based on Requirement
 Still the first version, so life's chill.
+ADD the documentation into rules (or stuff like that)
 
 ## Editor - simple web application
 // this part is prolly gonna be handled by GEMINI.
+A web application that include "generating JSON file" and "generating binary file based on the JSON file"
+-> you can choose which one to export as
 
 
-
-## Bridge - JSON FILE
+### Bridge - JSON FILE
 For here, those characters and objects are called actors cuz I don't know the general names for them.
 
 Can rename everything later.
@@ -68,6 +70,7 @@ Actions allowed to be call:
 
 ### PROCESSING THE DATA
 Write a script to compile the json file into binary files and let the psp engine fread() the binary blob directly into the arrays in one operation.
+With python
 
 ## Engine - C and static
 As the job over here is to provide the "lego bricks" that games can be built upon of, we can split different attributes into different "components".

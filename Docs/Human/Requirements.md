@@ -48,3 +48,10 @@ I'm thinking about allow using function calling models
 ## Editor
 maybe
 
+
+
+# FINAL PRODUCT
+
+# ROAD MAP
+ -> M1 is xxxx
+    based on M1, derive the architecture (M1 being Minimum Viable Product)
