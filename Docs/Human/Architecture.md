@@ -155,40 +155,48 @@ render_system();
 
 ### Planned Directory tree
 
-``` 
-Engine/
-├── src/
-│   ├── main.c               # Entry point, PSP initialization, and the Main Game Loop
+```text
+psp_engine/
+├── Makefile                 # Standard PSPSDK makefile for building the project
+├── src/                     # Source code (.c files)
+│   ├── main.c               # Entry point, PSP hardware initialization, and the Main Game Loop
+│   ├── core/                # Core engine infrastructure
+│   │   ├── memory.c         # Memory management (Custom Arena Allocators)
+│   │   └── ecs.c            # Entity Component System (Entity ID generation, component registry)
+│   ├── systems/             # System logic that processes components
+│   │   ├── physics.c        # Processes collisions and movement updates
+│   │   ├── render.c         # Handles drawing to screen via PSP's libgu/libgum
+│   │   └── audio.c          # Hardware audio playback management
+│   └── loaders/             # Parsing and loading runtime data
+│       ├── scene_parser.c   # Parses the binary scene blob into ECS memory
+│       └── asset_loader.c   # Loads textures/audio into the appropriate arrays
+├── include/                 # Public headers (.h files) corresponding to src/
 │   ├── core/
-│   │   ├── memory.c/h       # Static arrays, arena allocators
-│   │   └── ecs.c/h          # Entity management (ID generation, component registry)
-│   ├── components/          # Pure data structures (Transform, Sprite, Collider)
-│   ├── systems/             # The logic that loops over components
-│   │   ├── physics.c        # Updates Transforms based on Colliders
-│   │   ├── render.c         # Pushes Sprite/Transform data to the PSP's libgu
-│   │   └── audio.c          # Plays hardware audio channels
-│   └── loaders/
-│       ├── scene_parser.c   # Parses the binary scene file
-│       └── asset_loader.c   # Loads textures/audio into the arrays defined in the Asset Manifest
-├── include/                 # Public headers
-├── vendor/                  # Third-party libs  
-└── Makefile                 # Standard PSPSDK makefile
-
+│   ├── systems/
+│   ├── components/          # Pure Data Structures (transform.h, sprite.h, collider.h)
+│   └── psp_utils.h          # Helper macros and PSP specific definitions
+├── assets/                  # Raw game assets (converted during build)
+└── docs/                    # Engine documentation
 ```
 
-#### Fancy words
-Arena refers to a large pre-allocated block of memory that you "carve" smaller peice out of. -> only use `malloc` ONCE! (fuck malloc, it's too slow)
+### Key Technical Concepts
 
-orginal arena:  
-`[---------------------------------------------] (100 bytes)`  
+#### Memory Arenas (Linear Allocation)
+An **Arena Allocator** is a technique to avoid the slow performance and fragmentation of calling standard `malloc()` and `free()` repeatedly during gameplay. 
+
+Instead of asking the OS for memory every time we need it, we allocate one massive block (an "arena") at engine startup. We then distribute chunks of this block by simply moving an offset pointer forward.
+
+*Example:*
+1. **Initial State:** Arena of 100 bytes is empty. Offset = 0.
+   `[---------------------------------------------] (100 bytes)`  
 `^ offset = 0`
 
 Add some data:  
-`[Transform (16b) |----------------------------] (100 bytes)`    
+   `[Transform (16b) |----------------------------] (100 bytes)`    
 `^ offset = 16`
 
 Add some more data, it'll look like this:  
-`[Transform (16b) | Sprite (4b) |--------------] (100 bytes)`    
+   `[Transform (16b) | Sprite (4b) |--------------] (100 bytes)`    
 `^ offset = 20`
 
 The offset is being kept manually.
