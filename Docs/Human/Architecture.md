@@ -168,7 +168,7 @@ Engine/
 │       ├── scene_parser.c   # Parses the binary scene file
 │       └── asset_loader.c   # Loads textures/audio into the arrays defined in the Asset Manifest
 ├── include/                 # Public headers
-├── vendor/                  # Third-party libs (e.g., cJSON for parsing parsing the Editor's output)
+├── vendor/                  # Third-party libs  
 └── Makefile                 # Standard PSPSDK makefile
 
 ```
@@ -181,7 +181,7 @@ orginal arena:
 `^ offset = 0`
 
 Add some data:  
-`[Transform (16b) |-----------------------------] (100 bytes)`    
+`[Transform (16b) |----------------------------] (100 bytes)`    
 `^ offset = 16`
 
 Add some more data, it'll look like this:  
@@ -190,13 +190,13 @@ Add some more data, it'll look like this:
 
 The offset is being kept manually.
 
-### THINGS TO KEEP IN MIND
+### THINGS TO KEEP IN MIND THAT I HAVE NO CLUE HOW TO APPROACH RN  
 
 #### Asset Loading & Memory Management will blow up
-Best approach: Pack all assets into a virtually mounted archive file (like a .zip or a custom .pak). For audio, stream background music directly from the disc (.at3 or mp3) via a separate thread, rather than loading it all into memory. Only load small sound effects into RAM.
+Pack all assets into a virtually mounted archive file (like a .zip or a custom .pak). For audio, stream background music directly from the disc (.at3 or mp3) via a separate thread, rather than loading it all into memory. Only load small sound effects into RAM.
 
 #### Naïve ECS Mapping
-Best approach: Sparse Sets or Archetypes. If that is too complex for V1.0, at least maintain a dense array of active components and map them back to the Entity ID, rather than using the Entity ID as the direct array index.
+Sparse Sets or Archetypes. If that is too complex for V1.0, at least maintain a dense array of active components and map them back to the Entity ID, rather than using the Entity ID as the direct array index.
 
 #### Collision Detection
 Prolly only check around the certain entity
@@ -205,3 +205,6 @@ Prolly only check around the certain entity
 // LOCK TO 30fps or something
 decoupling physics speed from the framerate ?entirely (?) MAYBE NOT A GOOD IDEA
 Anyhow, maybe?
+
+#### Texture loading pipeline
+The Editor needs an "Asset Pipeline" that converts .png images into raw uncompressed pixel data (.raw or .tim2) during the build/export phase. Even better, it should pre-swizzle the textures (a PSP hardware feature to optimize GPU cache). The engine should just fread() that raw binary chunk straight into VRAM or Main RAM and draw it. No decompression on the PSP needed.
