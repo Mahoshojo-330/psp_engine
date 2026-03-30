@@ -1,0 +1,5 @@
+/*
+velocity of stuff
+gravity speed
+gravity direction
+*/

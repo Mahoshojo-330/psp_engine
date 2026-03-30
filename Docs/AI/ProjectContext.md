@@ -23,10 +23,10 @@ The project is divided into an authoring tool pipeline and the static C-based PS
 The engine follows a strict structure: `core/` (memory, ecs), `systems/` (physics, render, audio), and `loaders/` (parsing the binary blob and loading assets).
 
 ### Memory & Asset Management
-*   **Memory Arenas:** The engine uses linear allocation (Arena Allocators) applied at engine startup to avoid slow `malloc()`/`free()` fragmentation during gameplay.
-*   **ECS Mapping:** Uses dense arrays of active components mapping back to Entity IDs (Sparse Sets or Archetypes planned).
+*   **Memory Arenas:** The engine uses a custom linear allocation (`Arena_Init`, `Arena_Alloc`) to divide memory. It uses `sceKernelTotalFreeMemSize()` instead of hardcoded mallocs to maximize RAM scaling across PSP hardware versions.
+*   **Component Architecture:** DOD (Data-Oriented Design) is strictly enforced. Components (`transform.h`, `sprite.h`, `collider.h`) contain ONLY tightly-packed 32-bit floats and integers (perfect alignment) and no functions. Visual `Sprite` data is stripped of heavy textures, using `int global_texture_id` instead.
+*   **Physics/Audio:** Placeholders for `physics.h` and `audio.h` exist, demonstrating the Lego-brick scalability of the ECS design.
 *   **Asset Pipeline:** The python compiler will pre-swizzle textures and export to raw uncompressed formats (`.raw` or `.tim2`) for the PSP to read directly into VRAM without decompression.
-*   **Audio:** Long background tracks stream directly from disc in a separate thread, while small sound effects are loaded into RAM.
 
 ## 5. Future Stretch Goals (Not for V1.0)
 *   **Code Stripping / Dynamic Recompiling:** Moving to custom-compiling PSPSDK C code to save RAM.
