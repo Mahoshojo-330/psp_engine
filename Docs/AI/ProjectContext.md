@@ -40,3 +40,4 @@ The engine follows a strict structure: `core/` (memory, ecs), `systems/` (physic
 4.  **Challenger Mindset:** DO NOT agree with the user blindly. ALWAYS reply with the best approach possible based on my engineering expertise.
 5.  **Hands off Human Docs:** DO NOT make changes in the `Docs/Human/` folder unless being deliberately told to do so.
 6.  **Explicit Coding Only:** DO NOT write any code except when explicitly told to do so, EXCEPT for making changes to the AI folder.
+7.  **Naming Collisions (ECS vs Hardware):** Pure Data-Oriented ECS structure components must live in `components/`. Hardware-specific struct layouts (like `TextureVertex` for the PSP GPU) must live in `include/systems/` to prevent semantic overlap.
