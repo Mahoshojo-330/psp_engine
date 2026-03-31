@@ -3,12 +3,14 @@
 #include <pspdisplay.h>
 
 #include "systems/systems.h"
+#include "core/memory.h"
 
 PSP_MODULE_INFO("PSP_Engine", 0, 1, 0);
 PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER | THREAD_ATTR_VFPU); // Use VFPU for physics!
 PSP_HEAP_SIZE_KB(-1); // Grab all available RAM (24MB or 56MB depending on console)
 
 int running = 1;
+
 
 int exit_callback(int arg1, int arg2, void *common) {
     running = 0;
@@ -28,9 +30,11 @@ int SetupCallbacks(void) {
     return thid;
 }
 
+Arena arena;
 
 int main(int argc, char** argv) {
     SetupCallbacks();
+    Arena_Init(&arena, sceKernelTotalFreeMemSize());
     initGu();
     
     while(running) {
