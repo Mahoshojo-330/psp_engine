@@ -44,14 +44,10 @@ Render related
 Code Stripping + recompiling instead of using a static compiled engine -> also language support other than plain English
 Open for user to add like they can import their own logic with C or Lua.
 I'm thinking about allow using function calling models
+For the rendering, improve effeciency
 
 ## Editor
 maybe
 
 
 
-# FINAL PRODUCT
-
-# ROAD MAP
- -> M1 is xxxx
-    based on M1, derive the architecture (M1 being Minimum Viable Product)
