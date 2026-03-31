@@ -25,14 +25,14 @@ output: unsigned char* updated of where the data can be write to
 
 Notes: 
     would return NULL if overflow
-    RAM ALLIGN 8 byte 
+    RAM ALLIGN 4 byte 
 */
 unsigned char* Arena_Alloc(Arena* arena, size_t size){
     if ((arena -> offset) + size > (arena -> total_size)){
         return NULL;
     }
     unsigned char* ret = (arena -> buffer) + (arena -> offset);
-    arena -> offset += (size + 7) & ~7;
+    arena -> offset += (size + 3) & ~3;
 
     return ret;
 }

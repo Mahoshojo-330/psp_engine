@@ -4,15 +4,15 @@
 Get a static scene rendering on real PSP hardware from editor-authored data.
 
 ### Engine
-- [ ] ECS core (entity IDs, dense component arrays from arena)
+- [x] ECS core (entity IDs, parallel arrays indexed by entity ID, component bitmasks)
+- [ ] Scene parser (fread binary blob into ECS arrays)
 - [ ] Render loop (iterate Transform + Sprite arrays, draw textured quads)
 - [ ] Texture loading (pre-decoded images into RAM/VRAM, mapped by integer ID)
-- [ ] Scene parser (fread binary blob into ECS arrays)
 - [ ] Input system (d-pad / buttons via sceCtrlReadBufferPositive)
 
 ### Pipeline
-- [ ] Define binary scene format (header + entity table + component data + asset manifest)
-- [ ] Python compiler: JSON → binary blob
+- [x] Define binary scene format (entity_count + masks + component arrays, LE)
+- [x] Python compiler: JSON → binary blob (magic_bridge.py)
 - [ ] Asset pipeline: PNG → pre-swizzled raw texture data
 
 ### Editor

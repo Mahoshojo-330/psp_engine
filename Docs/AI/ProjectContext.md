@@ -12,9 +12,9 @@ Web Editor → scene.json → Python Compiler → binary blob → PSP Engine (fr
 ```
 
 ### Engine Paradigm
-- **ECS (Entity-Component-System):** Entities are integer IDs. Components are dense, flat data arrays. Systems are C functions that iterate those arrays.
+- **ECS (Entity-Component-System):** Entities are integer IDs (0 to entity_count-1). Components are global parallel arrays indexed by entity ID (MAX_ENTITIES=256). Per-entity `uint32_t` bitmask tracks which components exist. Systems are C functions that iterate those arrays checking masks.
 - **DOD (Data-Oriented Design):** No OOP. Contiguous structs, no pointer chasing. Components contain ONLY packed 32-bit floats/ints.
-- **Memory:** Single arena allocator. No malloc/free during gameplay.
+- **Memory:** Arena allocator for scene-transient data (textures, parsed blobs). ECS arrays are globals (not arena-allocated) — they persist across scene transitions, only their contents are overwritten.
 - **Assets:** Pre-swizzled textures (.raw/.tim2), file paths mapped to integer IDs at compile time. Zero parsing at runtime.
 
 ### Directory Layout

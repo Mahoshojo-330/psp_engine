@@ -1,9 +1,7 @@
 /*
 The flags are in the following order, each takign 1 bit size
 
-1. is_active
-2. is_solid
-3. is_being_controlled
+1. is_solid?
 ...
 
 */
