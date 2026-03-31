@@ -46,3 +46,5 @@ void endGu(){
     sceGuDisplay(GU_FALSE);
     sceGuTerm();
 }
+
+

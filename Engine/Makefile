@@ -1,5 +1,8 @@
 TARGET = psp_engine
 OBJS = src/main.o \
+       src/systems/render.o \
+       src/core/memory.o
+
 
 INCDIR = include
 CFLAGS = -O2 -G0 -Wall
