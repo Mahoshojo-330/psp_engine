@@ -1,32 +1,41 @@
-# AI KNOWLEDGE BASE: PSPSDK & PSP HARDWARE
+# PSPSDK & PSP Hardware Reference
 
-## 1. HARDWARE CONSTRAINTS
-- **CPU:** MIPS R4000 (Allegrex) @ 333MHz
-- **FPU/VFPU:** Fast floating-point math. Avoid double precision `double`. Always use `float`.
-- **RAM:** PSP-1000 = 32MB (24MB usable). PSP-2000 = 64MB (56MB usable).
-- **VRAM:** 2MB mapped in uncached space.
-- **Cache:** 16KB Instruction, 16KB Data. Data cache is NOT coherent with VRAM or DMA (use `sceKernelDcacheWritebackInvalidateAll()` before DMA/GU rendering).
+## Hardware Constraints
+| Resource | PSP-1000 | PSP-2000+ |
+|----------|----------|-----------|
+| CPU | MIPS R4000 (Allegrex) @ 333MHz | Same |
+| Usable RAM | 24MB | 56MB |
+| VRAM | 2MB (uncached) | 2MB (uncached) |
+| I-Cache / D-Cache | 16KB / 16KB | 16KB / 16KB |
 
-## 2. PSPSDK CORE AWARENESS
-- **Source:** https://pspdev.github.io/pspsdk/
-- **Memory Allocation:** Hard-coded `malloc()` sizes are an anti-pattern. 
-  - **Best Practice:** Use `PSP_HEAP_SIZE_KB(-1)` to dynamically allocate all available RAM to the PRX heap, then `sceKernelTotalFreeMemSize()` to size custom Arena Allocators.
-- **Build System:** Always output PRX unless debugging GDB locally. 
-  - `BUILD_PRX = 1`
-  - `PSP_LARGE_MEMORY = 1`
-  - Utilizes `psp-build-exports`, `psp-fixup-imports`, and `pack-pbp` to generate `EBOOT.PBP`.
+- **Always `float`, never `double`** — the VFPU is single-precision only.
+- **D-Cache is NOT coherent** with VRAM or DMA. Call `sceKernelDcacheWritebackInvalidateAll()` before any GU render or DMA transfer.
 
-## 3. PACKAGE CAPABILITIES (psp-pacman)
-- **Source:** https://pspdev.github.io/psp-packages/
-- **Avoid:** Heavy C++ standard library usage or large memory-managed libraries if possible.
-- **Critical Libraries for Engine:**
-  - `libGU` / `libGUM`: Raw access to the Graphics Engine (GE). Requires creating a Display List (DL) buffer.
-  - `stb`: (`stb_image`, `stb_vorbis`) Zero-dependency, low-overhead assets.
-  - `libpspvram`: VRAM allocation manager.
-  - `libintrafont`: Native font rendering via SCE's system firmware fonts.
-  - `libmad` / `libogg`: Audio streaming from UMD/Memory Stick.
+## Build System
+```makefile
+BUILD_PRX = 1
+PSP_LARGE_MEMORY = 1        # Access extra RAM on PSP-2000+
+PSP_HEAP_SIZE_KB(-1)        # Grab all available RAM for PRX heap
+```
+Output chain: `psp-build-exports` → `psp-fixup-imports` → `pack-pbp` → `EBOOT.PBP`
 
-## 4. ENGINE ARCHITECTURE CONTEXT
-- **Paradigm:** Data-Oriented Design (DOD). Dense component arrays (`TransformComponent`, `SpriteComponent`).
-- **Memory Management:** Custom Linear Arena Allocators. Do NOT use `free()` during the main game loop.
-- **Asset Pipeline:** Desktop Python pipeline compiles JSON to raw binary (`.raw`/`.tim2`). Game engine reads via `fread()` directly into the component/asset arrays (Zero-parsing architecture).
+## Key Libraries
+| Library | Purpose |
+|---------|---------|
+| `libgu` / `libgum` | Graphics Engine — display lists, draw commands |
+| `stb_image` | PNG/JPG decode (for desktop pipeline; engine should use pre-decoded) |
+| `libpspvram` | VRAM allocation manager |
+| `libintrafont` | System firmware font rendering |
+| `libmad` / `libogg` | Audio streaming |
+
+## Memory Best Practices
+- `PSP_HEAP_SIZE_KB(-1)` + `sceKernelTotalFreeMemSize()` to size arenas dynamically.
+- Hard-coded `malloc()` sizes are an anti-pattern.
+- No `free()` during game loop. Arena reset between scenes.
+
+## GU Pipeline Notes
+- Display list buffer must be 16-byte aligned (`__attribute__((aligned(16)))`).
+- Frame pattern: `sceGuStart` → draw commands → `sceGuFinish` → `sceGuSync` → `sceDisplayWaitVblankStart` → `sceGuSwapBuffers`.
+- 2D rendering: `GU_SPRITES` primitive with `GU_TRANSFORM_2D` flag. Two vertices per sprite (top-left, bottom-right).
+- Texture power-of-2 not strictly required but strongly recommended for performance.
+- ABGR color format (not RGBA).
