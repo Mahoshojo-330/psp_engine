@@ -28,8 +28,9 @@ I have no clue whether this is correct
 */
 void load_scene(Arena* arena){
     // read into arena
-    int fd = sceIoOpen("path to file", O_RDONLY, 0777); // is the datatype correct? also the path to file, need to change the file name each time? How? 
+    SceUID fd = sceIoOpen("path to file", O_RDONLY, 0777); // is the datatype correct? also the path to file, need to change the file name each time? How? 
     unsigned char* bytes = (arena -> buffer) + (arena -> offset);
+    int size = sceIoLseek(); // modify this
     int bytes_read = sceIoRead(fd, bytes, 100); 
 
     (arena -> offset) = Arena_Alloc(arena, bytes_read);
@@ -40,14 +41,14 @@ void load_scene(Arena* arena){
 parse the data
 */
 void parse_scene(Arena* arena, unsigned char* bytes){
-    int n = *(int *)&bytes[0];
+    uint32_t n = *(int *)&bytes[0];
 
     // write masks
     memcpy(component_masks, bytes[4], n * sizeof(uint32_t));
 
     // write into component lists
-    memcpy(transforms, bytes[(4 * n) + 4], 5 * sizeof(Transform_Component));
-    memcpy(sprites, bytes[(20 * n) + 4], 5 * sizeof(Sprite_Component));
-    memcpy(collider, bytes[(28 * n) + 4], 5 * sizeof(Collider_Component));
+    memcpy(transforms, bytes[(4 * n) + 4], n * sizeof(Transform_Component));
+    memcpy(sprites, bytes[(20 * n) + 4], n * sizeof(Sprite_Component));
+    memcpy(collider, bytes[(28 * n) + 4], n * sizeof(Collider_Component));
 
 }
