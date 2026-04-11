@@ -21,6 +21,8 @@ Component bit assignments (must match Engine/src/core/ecs.h):
 
 #include "pspiofilemgr.h"
 #include "../core/memory.h"
+#include "../core/ecs.h"
+#include <string.h>
 
 
 /*
@@ -28,27 +30,28 @@ I have no clue whether this is correct
 */
 void load_scene(Arena* arena){
     // read into arena
-    SceUID fd = sceIoOpen("path to file", O_RDONLY, 0777); // is the datatype correct? also the path to file, need to change the file name each time? How? 
-    unsigned char* bytes = (arena -> buffer) + (arena -> offset);
-    int size = sceIoLseek(); // modify this
-    int bytes_read = sceIoRead(fd, bytes, 100); 
+    SceUID fd = sceIoOpen("path to file", O_RDONLY, 0777); // is the datatype correct? also the path to file, need to change the file name each time? How?
+    int size = (int)sceIoLseek(fd, 0, SEEK_END);
+    sceIoLseek(fd, 0, SEEK_SET);
 
-    (arena -> offset) = Arena_Alloc(arena, bytes_read);
+    unsigned char* bytes = Arena_Alloc(arena, size);
+    sceIoRead(fd, bytes, size);
+    sceIoClose(fd);
 }
 
 
 /*
 parse the data
 */
-void parse_scene(Arena* arena, unsigned char* bytes){
-    uint32_t n = *(int *)&bytes[0];
+void parse_scene(unsigned char* bytes){
+    uint32_t n = *(uint32_t *)&bytes[0];
 
     // write masks
-    memcpy(component_masks, bytes[4], n * sizeof(uint32_t));
+    memcpy(component_masks, bytes + 4, n * sizeof(uint32_t));
 
     // write into component lists
-    memcpy(transforms, bytes[(4 * n) + 4], n * sizeof(Transform_Component));
-    memcpy(sprites, bytes[(20 * n) + 4], n * sizeof(Sprite_Component));
-    memcpy(collider, bytes[(28 * n) + 4], n * sizeof(Collider_Component));
+    memcpy(transforms, bytes + (4 * n) + 4, n * sizeof(Transform_Component));
+    memcpy(sprites,    bytes + (20 * n) + 4, n * sizeof(Sprite_Component));
+    memcpy(colliders,  bytes + (28 * n) + 4, n * sizeof(Collider_Component));
 
 }
