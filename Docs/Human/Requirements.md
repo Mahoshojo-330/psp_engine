@@ -44,10 +44,9 @@ Render related
 Code Stripping + recompiling instead of using a static compiled engine -> also language support other than plain English
 Open for user to add like they can import their own logic with C or Lua.
 I'm thinking about allow using function calling models
-For the rendering, improve effeciency
+For the rendering, improve effeciency by maybe using atlas instead of the current "read .raw files" 
 
 ## Editor
 maybe
-
 
 

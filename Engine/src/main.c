@@ -4,6 +4,11 @@
 
 #include "systems/systems.h"
 #include "core/memory.h"
+#include "loaders/asset_loader.h"
+
+/* scene_parser.c — no header yet */
+extern unsigned char* load_scene(Arena* arena, const char* path);
+extern void parse_scene(unsigned char* bytes);
 
 PSP_MODULE_INFO("PSP_Engine", 0, 1, 0);
 PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER | THREAD_ATTR_VFPU); // Use VFPU for physics!
@@ -36,16 +41,22 @@ int main(int argc, char** argv) {
     SetupCallbacks();
     Arena_Init(&arena, sceKernelTotalFreeMemSize());
     initGu();
-    
+
+    /* Load scene and textures */
+    unsigned char* scene_bytes = load_scene(&arena, "scenes/scene.bin");
+    if (scene_bytes) {
+        parse_scene(scene_bytes);
+        load_scene_textures(&arena, "scenes");
+    }
+
     while(running) {
         // [READ PLAYER INPUT HERE]
-        
+
         // [PROCESS PHYSICS HERE]
-        
-        // [RENDER FRAME HERE]
-        
-        // Lock to the Screen's refresh rate (vsync) so we don't melt the CPU
-        sceDisplayWaitVblankStart();
+
+        startFrame();
+        render_system_update();
+        endFrame();
     }
 
     endGu();

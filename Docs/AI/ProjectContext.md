@@ -15,7 +15,7 @@ Web Editor → scene.json → Python Compiler → binary blob → PSP Engine (fr
 - **ECS (Entity-Component-System):** Entities are integer IDs (0 to entity_count-1). Components are global parallel arrays indexed by entity ID (MAX_ENTITIES=256). Per-entity `uint32_t` bitmask tracks which components exist. Systems are C functions that iterate those arrays checking masks.
 - **DOD (Data-Oriented Design):** No OOP. Contiguous structs, no pointer chasing. Components contain ONLY packed 32-bit floats/ints.
 - **Memory:** Arena allocator for scene-transient data (textures, parsed blobs). ECS arrays are globals (not arena-allocated) — they persist across scene transitions, only their contents are overwritten.
-- **Assets:** Pre-swizzled textures (.raw/.tim2), file paths mapped to integer IDs at compile time. Zero parsing at runtime.
+- **Assets:** Individual `.raw` textures (V1). Each file: `[uint32 w][uint32 h][RGBA8888 pixels]`, power-of-2 padded. `global_texture_id` indexes `textures[]` table; engine loads `tex_{id}.raw` by convention. Textures in main RAM (GU DMAs transparently). Pipeline: `texture_converter.py` converts PNGs. Atlas upgrade planned post-V1 as pipeline-only change.
 
 ### Directory Layout
 ```
@@ -28,6 +28,7 @@ Engine/
 ├── include/systems/        # GPU-facing structs (TextureVertex, Texture)
 Pipeline/
 ├── magic_bridge.py         # JSON → binary compiler
+├── texture_converter.py    # PNG → .raw texture converter
 ```
 
 ### Naming Collision Rule

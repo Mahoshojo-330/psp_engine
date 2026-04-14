@@ -4,7 +4,9 @@
 // --- Render System ---
 void initGu(void);
 void endGu(void);
-// void render_system_update(void); // Pass component arrays here later
+void startFrame(void);
+void endFrame(void);
+void render_system_update(void);
 
 
 // --- Physics System ---

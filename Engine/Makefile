@@ -1,7 +1,10 @@
 TARGET = psp_engine
 OBJS = src/main.o \
        src/systems/render.o \
-       src/core/memory.o
+       src/core/memory.o \
+       src/core/ecs.o \
+       src/loaders/scene_parser.o \
+       src/loaders/asset_loader.o
 
 
 INCDIR = include

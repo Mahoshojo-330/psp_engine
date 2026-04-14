@@ -25,33 +25,28 @@ Component bit assignments (must match Engine/src/core/ecs.h):
 #include <string.h>
 
 
-/*
-I have no clue whether this is correct
-*/
-void load_scene(Arena* arena){
-    // read into arena
-    SceUID fd = sceIoOpen("path to file", O_RDONLY, 0777); // is the datatype correct? also the path to file, need to change the file name each time? How?
-    int size = (int)sceIoLseek(fd, 0, SEEK_END);
+unsigned char* load_scene(Arena* arena, const char* path){
+    SceUID fd = sceIoOpen(path, PSP_O_RDONLY, 0);
+    if (fd < 0) return NULL;
+
+    SceOff file_size = sceIoLseek(fd, 0, SEEK_END);
     sceIoLseek(fd, 0, SEEK_SET);
 
-    unsigned char* bytes = Arena_Alloc(arena, size);
-    sceIoRead(fd, bytes, size);
+    unsigned char* bytes = Arena_Alloc(arena, (size_t)file_size);
+    if (!bytes) { sceIoClose(fd); return NULL; }
+
+    sceIoRead(fd, bytes, (SceSize)file_size);
     sceIoClose(fd);
+    return bytes;
 }
 
 
-/*
-parse the data
-*/
 void parse_scene(unsigned char* bytes){
     uint32_t n = *(uint32_t *)&bytes[0];
+    entity_count = n;
 
-    // write masks
     memcpy(component_masks, bytes + 4, n * sizeof(uint32_t));
-
-    // write into component lists
-    memcpy(transforms, bytes + (4 * n) + 4, n * sizeof(Transform_Component));
+    memcpy(transforms, bytes + (4 * n) + 4,  n * sizeof(Transform_Component));
     memcpy(sprites,    bytes + (20 * n) + 4, n * sizeof(Sprite_Component));
     memcpy(colliders,  bytes + (28 * n) + 4, n * sizeof(Collider_Component));
-
 }
