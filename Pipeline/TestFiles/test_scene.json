@@ -1,0 +1,30 @@
+{
+    "entities": [
+        {
+            "player_controlled": true,
+            "components": {
+                "transform": { "x": 200.0, "y": 120.0, "width": 32, "height": 32 },
+                "sprite": { "global_texture_id": 0, "colour_tint": 4294967295 },
+                "collider": { "offset_x": 0.0, "offset_y": 0.0, "width": 32.0, "height": 32.0, "flags": 1 }
+            }
+        },
+        {
+            "components": {
+                "transform": { "x": 100.0, "y": 200.0, "width": 128, "height": 128 },
+                "sprite": { "global_texture_id": 1, "colour_tint": 4294967295 }
+            }
+        },
+        {
+            "components": {
+                "transform": { "x": 350.0, "y": 50.0, "width": 32, "height": 32 },
+                "sprite": { "global_texture_id": 0, "colour_tint": 4278190335 }
+            }
+        },
+        {
+            "components": {
+                "transform": { "x": 0.0, "y": 240.0, "width": 480, "height": 32 },
+                "collider": { "offset_x": 0.0, "offset_y": 0.0, "width": 480.0, "height": 32.0, "flags": 2 }
+            }
+        }
+    ]
+}
