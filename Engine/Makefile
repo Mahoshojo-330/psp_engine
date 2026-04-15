@@ -2,6 +2,8 @@ TARGET = build/psp_engine
 
 OBJS = build/src/main.o \
        build/src/systems/render.o \
+       build/src/systems/physics.o \
+       build/src/systems/input.o \
        build/src/core/memory.o \
        build/src/core/ecs.o \
        build/src/loaders/scene_parser.o \

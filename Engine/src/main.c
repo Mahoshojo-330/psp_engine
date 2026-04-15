@@ -41,6 +41,7 @@ int main(int argc, char** argv) {
     SetupCallbacks();
     Arena_Init(&arena, sceKernelTotalFreeMemSize());
     initGu();
+    input_init();
 
     /* Load scene and textures */
     unsigned char* scene_bytes = load_scene(&arena, "scenes/scene.bin");
@@ -50,9 +51,8 @@ int main(int argc, char** argv) {
     }
 
     while(running) {
-        // [READ PLAYER INPUT HERE]
-
-        // [PROCESS PHYSICS HERE]
+        input_system_update();
+        physics_system_update();
 
         startFrame();
         render_system_update();

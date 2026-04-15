@@ -9,8 +9,12 @@ void endFrame(void);
 void render_system_update(void);
 
 
+// --- Input System ---
+void input_init(void);
+void input_system_update(void);
+
 // --- Physics System ---
-// void physics_system_update(void);
+void physics_system_update(void);
 
 
 // --- Audio System ---

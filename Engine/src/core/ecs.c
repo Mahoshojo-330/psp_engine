@@ -8,6 +8,7 @@ uint32_t entity_count;
 Transform_Component transforms[MAX_ENTITIES];
 Sprite_Component    sprites[MAX_ENTITIES];
 Collider_Component  colliders[MAX_ENTITIES];
+Physics_Component   physics[MAX_ENTITIES];
 
 uint32_t component_masks[MAX_ENTITIES];
 

@@ -16,10 +16,10 @@ magic_bridge.py must match these bit assignments exactly.
 
 #include <stdint.h>
 
-// only include the following for now..
 #include "../components/transform.h"
 #include "../components/sprite.h"
 #include "../components/collider.h"
+#include "../components/physics.h"
 
 #define MAX_ENTITIES 256
 
@@ -42,6 +42,7 @@ extern uint32_t component_masks[MAX_ENTITIES];
 extern Transform_Component transforms[MAX_ENTITIES];
 extern Sprite_Component    sprites[MAX_ENTITIES];
 extern Collider_Component  colliders[MAX_ENTITIES];
+extern Physics_Component   physics[MAX_ENTITIES];
 
 
 /*
