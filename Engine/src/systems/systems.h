@@ -16,6 +16,9 @@ void input_system_update(void);
 // --- Physics System ---
 void physics_system_update(void);
 
+// --- Collision System ---
+void collision_system_update(void);
+
 
 // --- Audio System ---
 // void audio_system_update(void);

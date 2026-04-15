@@ -53,6 +53,7 @@ int main(int argc, char** argv) {
     while(running) {
         input_system_update();
         physics_system_update();
+        collision_system_update();
 
         startFrame();
         render_system_update();

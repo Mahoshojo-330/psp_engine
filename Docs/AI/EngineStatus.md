@@ -18,10 +18,10 @@ Last updated: 2026-04-15
 
 - [x] **Input System** (`systems/input.c`) — `input_init()` configures analog mode, `input_system_update()` reads `sceCtrlReadBufferPositive()` once per frame, iterates entities with `COMP_ACTIVE | COMP_INPUT | COMP_PHYSICS`, writes `vx`/`vy` from D-pad + analog stick. Hardcoded `PLAYER_SPEED 2.0f`, analog dead zone = 30. Input overwrites velocity each frame (gravity accumulation only applies to non-player entities).
 - [x] **Physics System** (`systems/physics.c`) — `physics_system_update()` iterates entities with `COMP_ACTIVE | COMP_PHYSICS | COMP_TRANSFORM`. Applies per-entity gravity (4-direction enum) to velocity, then velocity to position. No collision resolution yet.
-- [x] **Main Loop Wiring** — Execution order: `input_system_update()` → `physics_system_update()` → `startFrame()` → `render_system_update()` → `endFrame()`.
+- [x] **Main Loop Wiring** — Execution order: `input_system_update()` → `physics_system_update()` → `collision_system_update()` → `startFrame()` → `render_system_update()` → `endFrame()`.
+- [x] **Collision System** (`systems/collision.c`) — Brute-force O(N²) AABB overlap detection on entities with `COMP_ACTIVE | COMP_COLLIDER | COMP_TRANSFORM`. Resolution: minimum penetration axis push-apart when both colliders have `is_solid` (flags bit 0). Dynamic entities (`COMP_PHYSICS`) get pushed; static entities are immovable. Velocity zeroed on collision axis to prevent gravity accumulation.
 
 ## Not Started (Priority Order)
-1. **Collision Detection** — AABB overlap on `Collider_Component`, push-apart resolution along smallest overlap axis. `is_solid` flag distinguishes blocking vs trigger colliders. Separate from basic physics.
 2. **Audio System** (`systems/audio.c`) — Background music streaming + SFX playback. `audio.h` stub exists (comments only, no struct).
 
 ## Design Decisions Resolved
