@@ -21,7 +21,7 @@ LIBS = -lpspgu -lpspgum -lm
 PSP_EBOOT_TITLE = PSP Engine
 PSP_EBOOT = build/EBOOT.PBP
 PSP_EBOOT_SFO = build/PARAM.SFO
-EXTRA_TARGETS = $(PSP_EBOOT)
+EXTRA_TARGETS = $(PSP_EBOOT) assets
 
 PSPSDK=$(shell psp-config --pspsdk-path)
 include $(PSPSDK)/lib/build.mak
@@ -30,6 +30,10 @@ include $(PSPSDK)/lib/build.mak
 build/%.o: %.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
+
+# Build test scene assets after linking
+assets:
+	@cd ../Pipeline/TestFiles && ./build_test.sh
 
 # Override clean to just nuke the build dir
 clean:

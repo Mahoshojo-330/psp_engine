@@ -1,25 +1,28 @@
 # Engine Implementation Status
 
-Last updated: 2026-04-14
+Last updated: 2026-04-15
 
 ## Completed
 - [x] **Arena Allocator** (`core/memory.c`) — Init, Alloc (4-byte aligned), Reset. Sized from `sceKernelTotalFreeMemSize()`.
 - [x] **GU Init/Teardown** (`systems/render.c`) — Double-buffered 8888 mode, scissor, depth buffer, boots to blue screen.
-- [x] **Component Structs** — `Transform_Component` (16B), `Sprite_Component` (8B), `Collider_Component` (20B) all defined and tightly packed.
+- [x] **Component Structs** — `Transform_Component` (16B), `Sprite_Component` (8B), `Collider_Component` (20B), `Physics_Component` (16B) all defined and tightly packed.
 - [x] **GPU Structs** — `TextureVertex`, `Texture` in `include/systems/render.h`.
 - [x] **Main Loop Skeleton** — Callbacks, arena init, GU init, vsync loop.
-- [x] **Makefile** — Compiles main.o, render.o, memory.o, ecs.o, scene_parser.o, asset_loader.o with libgu/libgum.
+- [x] **Makefile** — Compiles main.o, render.o, memory.o, ecs.o, scene_parser.o, asset_loader.o, physics.o, input.o with libgu/libgum.
 - [x] **ECS Core** (`core/ecs.c/.h`) — Global parallel arrays indexed by entity ID (MAX_ENTITIES=256), per-entity component bitmask, `ECS_Clean()`. Component type enum is the contract between engine and pipeline.
-- [x] **Binary Scene Format** — Defined. Layout: `[uint32 entity_count][uint32 masks[N]][Transform[N]][Sprite[N]][Collider[N]]`, all little-endian. Every entity gets a slot in every component array; mask determines validity.
-- [x] **Python Compiler** (`Pipeline/magic_bridge.py`) — JSON → binary blob. Reads scene.json, packs component data matching C struct layouts, outputs blob ready for fread.
-- [x] **Scene Parser** (`loaders/scene_parser.c`) — `load_scene(arena, path)` reads binary file into arena, `parse_scene(bytes)` memcpys blob into ECS globals (masks, transforms, sprites, colliders) and sets `entity_count`.
+- [x] **Binary Scene Format** — Defined. Layout: `[uint32 entity_count][uint32 masks[N]][Transform[N]][Sprite[N]][Collider[N]][Physics[N]]`, all little-endian. Every entity gets a slot in every component array; mask determines validity.
+- [x] **Python Compiler** (`Pipeline/magic_bridge.py`) — JSON → binary blob. Reads scene.json, packs component data matching C struct layouts (including physics), outputs blob ready for fread.
+- [x] **Scene Parser** (`loaders/scene_parser.c`) — `load_scene(arena, path)` reads binary file into arena, `parse_scene(bytes)` memcpys blob into ECS globals (masks, transforms, sprites, colliders, physics) and sets `entity_count`.
 - [x] **Render Loop** (`systems/render.c`) — `startFrame()`/`endFrame()` bracket each frame, `render_system_update()` iterates ACTIVE+TRANSFORM+SPRITE entities. Draws textured sprites via `TextureVertex` when texture exists, falls back to solid-colour `ColourVertex` rects when no texture loaded.
 - [x] **Texture Loading** (`loaders/asset_loader.c`) — Individual `.raw` files (V1, not atlas). `load_texture(arena, path, id)` reads `[uint32 w][uint32 h][RGBA8888 pixels]` into arena. `load_scene_textures(arena, base_path)` scans ECS sprites for referenced texture IDs, loads `tex_0.raw`..`tex_N.raw`. Textures live in main RAM (PSP GU DMAs transparently). Pipeline: `texture_converter.py` converts PNGs to `.raw` with power-of-2 padding.
 
+- [x] **Input System** (`systems/input.c`) — `input_init()` configures analog mode, `input_system_update()` reads `sceCtrlReadBufferPositive()` once per frame, iterates entities with `COMP_ACTIVE | COMP_INPUT | COMP_PHYSICS`, writes `vx`/`vy` from D-pad + analog stick. Hardcoded `PLAYER_SPEED 2.0f`, analog dead zone = 30. Input overwrites velocity each frame (gravity accumulation only applies to non-player entities).
+- [x] **Physics System** (`systems/physics.c`) — `physics_system_update()` iterates entities with `COMP_ACTIVE | COMP_PHYSICS | COMP_TRANSFORM`. Applies per-entity gravity (4-direction enum) to velocity, then velocity to position. No collision resolution yet.
+- [x] **Main Loop Wiring** — Execution order: `input_system_update()` → `physics_system_update()` → `startFrame()` → `render_system_update()` → `endFrame()`.
+
 ## Not Started (Priority Order)
-1. **Input System** — `sceCtrlReadBufferPositive()`, query entities with `COMP_INPUT | COMP_TRANSFORM`.
-2. **Physics System** (`systems/physics.c`) — Velocity/gravity on `Physics_Component`, AABB collision on `Collider_Component`. `physics.h` stub exists (comments only, no struct).
-3. **Audio System** (`systems/audio.c`) — Background music streaming + SFX playback. `audio.h` stub exists (comments only, no struct).
+1. **Collision Detection** — AABB overlap on `Collider_Component`, push-apart resolution along smallest overlap axis. `is_solid` flag distinguishes blocking vs trigger colliders. Separate from basic physics.
+2. **Audio System** (`systems/audio.c`) — Background music streaming + SFX playback. `audio.h` stub exists (comments only, no struct).
 
 ## Design Decisions Resolved
 - **ECS storage:** Parallel arrays indexed by entity ID with global allocation (not arena). Arena is reserved for scene-transient data (textures, etc.). Dense arrays deferred to post-V1.
@@ -28,9 +31,10 @@ Last updated: 2026-04-14
 - **Scene transition:** `ECS_Clean()` zeroes entity_count + masks. Arena_Reset for transient scene data.
 
 ## Known Design Decisions Still Open
-- **Physics_Component struct:** Needs velocity (vx, vy), gravity direction, gravity magnitude. Not yet defined.
 - **Audio_Component struct:** Needs sound_id, loop flag, volume. Not yet defined.
 - **Atlas upgrade (post-V1):** Currently individual textures with per-entity texture bind. Atlas would reduce binds to one per frame — purely a pipeline change (packing + UV rect table), ~20 lines of render code difference. Worth doing when sprite count grows.
+- **Player gravity interaction:** Input system overwrites `vx`/`vy` each frame, so gravity doesn't accumulate on player-controlled entities. If jumping is needed, input would set only horizontal velocity and let physics handle vertical.
+- **Configurable input mapping:** Deferred. No action/event system to map to yet. D-pad/analog = movement is hardcoded.
 
 ## Design Decisions Resolved (Texture Loading)
 - **Individual textures for V1, atlas later.** One `.raw` file per texture ID. Simpler to debug, atlas is a pipeline-only upgrade later.

@@ -5,7 +5,8 @@
             "components": {
                 "transform": { "x": 200.0, "y": 120.0, "width": 32, "height": 32 },
                 "sprite": { "global_texture_id": 0, "colour_tint": 4294967295 },
-                "collider": { "offset_x": 0.0, "offset_y": 0.0, "width": 32.0, "height": 32.0, "flags": 1 }
+                "collider": { "offset_x": 0.0, "offset_y": 0.0, "width": 32.0, "height": 32.0, "flags": 1 },
+                "physics": { "vx": 0.0, "vy": 0.0, "gravity_magnitude": 0.0, "gravity_direction": 0 }
             }
         },
         {
@@ -23,7 +24,7 @@
         {
             "components": {
                 "transform": { "x": 0.0, "y": 240.0, "width": 480, "height": 32 },
-                "collider": { "offset_x": 0.0, "offset_y": 0.0, "width": 480.0, "height": 32.0, "flags": 2 }
+                "collider": { "offset_x": 0.0, "offset_y": 0.0, "width": 480.0, "height": 32.0, "flags": 1 }
             }
         }
     ]

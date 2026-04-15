@@ -6,7 +6,7 @@ Physics and Input are implemented as a pair. Physics comes first structurally (c
 
 ## Implementation Order
 
-### Step 1: Physics Component + System (no collision)
+### Step 1: Physics Component + System (no collision) — DONE
 
 **Physics_Component struct** (`src/components/physics.h`):
 ```
@@ -34,7 +34,9 @@ Total: 20 bytes. Gravity direction as uint8 enum rather than storing a normalize
 **Scene parser update** (`loaders/scene_parser.c`):
 - Add memcpy for physics array from blob
 
-### Step 2: Input System
+**Implementation note:** Physics_Component is 16 bytes, not 20 as originally stated. The fields (float vx + float vy + float gravity_magnitude + uint8_t gravity_direction + uint8_t padding[3]) sum to 16. 16 is already 4-byte aligned.
+
+### Step 2: Input System — DONE
 
 **No Input_Component struct.** `COMP_INPUT` remains a zero-size mask bit (already defined as bit 5 in `ecs.h`). This is correct — there's nothing to configure per-entity about input. The PSP has one controller; the mask just says "this entity responds to it."
 
@@ -51,7 +53,7 @@ Total: 20 bytes. Gravity direction as uint8 enum rather than storing a normalize
 
 **Input mapping:** Hardcoded for V1. D-pad/analog = movement, face buttons = TBD (jump, interact — these need an action/event system that doesn't exist yet). Configurable JSON mapping is deferred until there's a behavior system to map inputs TO. Reading all buttons is free (one API call returns everything), but the *mapping layer* has nothing to map to right now.
 
-### Step 3: Collision Detection (separate, after Step 1+2 work)
+### Step 3: Collision Detection (separate, after Step 1+2 work) — NOT STARTED
 
 - `Collider_Component` already exists (offset_x, offset_y, width, height, flags)
 - AABB overlap check between entities with `COMP_ACTIVE | COMP_COLLIDER | COMP_TRANSFORM`

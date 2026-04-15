@@ -22,7 +22,7 @@ Web Editor → scene.json → Python Compiler → binary blob → PSP Engine (fr
 Engine/
 ├── src/main.c              # Entry point + game loop
 ├── src/core/               # memory.c, ecs.c
-├── src/systems/            # render.c, physics.c, audio.c
+├── src/systems/            # render.c, physics.c, input.c, audio.c
 ├── src/loaders/            # scene_parser.c, asset_loader.c
 ├── src/components/         # Pure data structs (transform.h, sprite.h, etc.)
 ├── include/systems/        # GPU-facing structs (TextureVertex, Texture)

@@ -10,6 +10,7 @@ Binary format (all little-endian, matches PSP MIPS LE):
     [Transform_Component[entity_count]]   16 bytes each: float x, float y, int width, int height
     [Sprite_Component[entity_count]]       8 bytes each: int global_texture_id, uint32 colour_tint
     [Collider_Component[entity_count]]    20 bytes each: float offset_x, float offset_y, float width, float height, uint32 flags
+    [Physics_Component[entity_count]]     16 bytes each: float vx, float vy, float gravity_magnitude, uint8 gravity_direction, 3 pad
 
 Component bit assignments (must match Engine/src/core/ecs.h):
     COMP_ACTIVE    = 1 << 0
@@ -42,10 +43,12 @@ MAX_ENTITIES = 256
 FMT_TRANSFORM = '<ffii'    # x, y, width, height          = 16 bytes
 FMT_SPRITE    = '<iI'      # global_texture_id, colour_tint = 8 bytes
 FMT_COLLIDER  = '<ffffI'   # offset_x, offset_y, w, h, flags = 20 bytes
+FMT_PHYSICS   = '<fffB3x'  # vx, vy, gravity_magnitude, gravity_direction + 3 pad = 16 bytes
 
 ZERO_TRANSFORM = struct.pack(FMT_TRANSFORM, 0.0, 0.0, 0, 0)
 ZERO_SPRITE    = struct.pack(FMT_SPRITE, 0, 0)
 ZERO_COLLIDER  = struct.pack(FMT_COLLIDER, 0.0, 0.0, 0.0, 0.0, 0)
+ZERO_PHYSICS   = struct.pack(FMT_PHYSICS, 0.0, 0.0, 0.0, 0)
 
 
 def compile_scene(scene: dict) -> bytes:
@@ -60,6 +63,7 @@ def compile_scene(scene: dict) -> bytes:
     transform_data = []
     sprite_data = []
     collider_data = []
+    physics_data = []
 
     for entity in entities:
         mask = COMP_ACTIVE  # all exported entities are active
@@ -102,6 +106,19 @@ def compile_scene(scene: dict) -> bytes:
         else:
             collider_data.append(ZERO_COLLIDER)
 
+        # Physics
+        if "physics" in components:
+            mask |= COMP_PHYSICS
+            p = components["physics"]
+            physics_data.append(struct.pack(
+                FMT_PHYSICS,
+                float(p.get("vx", 0.0)), float(p.get("vy", 0.0)),
+                float(p.get("gravity_magnitude", 0.0)),
+                int(p.get("gravity_direction", 0))
+            ))
+        else:
+            physics_data.append(ZERO_PHYSICS)
+
         # Input (zero-size component, just a mask bit)
         if entity.get("player_controlled", False):
             mask |= COMP_INPUT
@@ -119,6 +136,8 @@ def compile_scene(scene: dict) -> bytes:
         blob += s
     for c in collider_data:
         blob += c
+    for p in physics_data:
+        blob += p
 
     return bytes(blob)
 
