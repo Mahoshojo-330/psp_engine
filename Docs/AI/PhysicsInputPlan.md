@@ -53,30 +53,82 @@ Total: 20 bytes. Gravity direction as uint8 enum rather than storing a normalize
 
 **Input mapping:** Hardcoded for V1. D-pad/analog = movement, face buttons = TBD (jump, interact — these need an action/event system that doesn't exist yet). Configurable JSON mapping is deferred until there's a behavior system to map inputs TO. Reading all buttons is free (one API call returns everything), but the *mapping layer* has nothing to map to right now.
 
-### Step 3: Collision Detection (separate, after Step 1+2 work) — NOT STARTED
+### Step 3: Collision Detection — NOT STARTED
 
-- `Collider_Component` already exists (offset_x, offset_y, width, height, flags)
-- AABB overlap check between entities with `COMP_ACTIVE | COMP_COLLIDER | COMP_TRANSFORM`
-- Resolution: push entities apart along smallest overlap axis
-- `is_solid` flag in `collider.flags` determines if collision blocks movement or is trigger-only
-- This is the complex part of physics — keep it separate from basic velocity/gravity
+Separate system from physics. New file `src/systems/collision.c` with `collision_system_update()`.
+
+**Collider flags definition (V1):**
+- Bit 0 (`0x01`): `is_solid` — blocks movement, triggers push-apart resolution.
+- No trigger logic for V1. Triggers need an event/callback system that doesn't exist yet — detecting overlaps we can't act on is wasted cycles. Additional flag bits (is_trigger, collision layers) added when the systems that consume them exist.
+
+**Detection — brute force O(N²):**
+- Iterate all pairs (i, j) where both have `COMP_ACTIVE | COMP_COLLIDER | COMP_TRANSFORM`.
+- MAX_ENTITIES=256 → worst case ~32K pair checks, each is 4 float comparisons. Trivially fast on PSP — no spatial partitioning needed.
+
+**AABB computation per entity:**
+```
+left   = transforms[i].x + colliders[i].offset_x
+top    = transforms[i].y + colliders[i].offset_y
+right  = left + colliders[i].width
+bottom = top  + colliders[i].height
+```
+
+**Overlap test:**
+```
+overlap = (a.left < b.right) && (a.right > b.left) &&
+          (a.top < b.bottom) && (a.bottom > b.top)
+```
+
+**Resolution — minimum penetration axis (solid vs solid only):**
+
+Only runs when both colliders have `is_solid` (flags & 0x01).
+
+1. Compute overlap on each axis:
+   - `overlap_x` = min(a.right, b.right) - max(a.left, b.left)
+   - `overlap_y` = min(a.bottom, b.bottom) - max(a.top, b.top)
+
+2. Push apart along the axis with smaller overlap (minimum penetration).
+
+3. Who gets pushed:
+   - Has `COMP_PHYSICS` → dynamic (can be pushed)
+   - No `COMP_PHYSICS` → static (immovable: floors, walls)
+   - Dynamic vs static: push the dynamic entity by full overlap
+   - Dynamic vs dynamic: push each by half overlap
+   - Static vs static: skip (neither can move)
+
+4. Push direction: away from the other entity's center (determines sign).
+
+5. Zero velocity on collision axis: when a dynamic entity is pushed out of a solid, zero the velocity component on that axis. Prevents gravity from accumulating while standing on a floor — without this, the entity sinks further each frame until push-apart can't keep up.
+
+**Files to modify:**
+- `Engine/src/systems/collision.c` — **New.** Full detection + resolution loop.
+- `Engine/src/main.c` — Add `collision_system_update()` call between physics and render.
+- `Engine/Makefile` — Add `collision.o` to the build.
+- `Pipeline/TestFiles/test_scene.json` — Fix floor flags: `2` → `1` (was a typo, floor should be solid).
 
 ## System Execution Order (main loop)
 
 ```
-input_system_update();    // read pad, write velocities
-physics_system_update();  // apply gravity + velocity to position, resolve collisions
-render_system_update();   // draw
+input_system_update();      // read pad, write velocities
+physics_system_update();    // apply gravity + velocity to position
+collision_system_update();  // AABB detect + resolve
+startFrame();
+render_system_update();     // draw
+endFrame();
 ```
 
-Input before physics so velocity is set before it's consumed. Physics before render so positions are final before drawing.
+Input before physics so velocity is set before it's consumed. Physics before collision so positions are updated before overlap checks. Collision before render so final positions are correct before drawing.
 
 ## What This Plan Does NOT Include
 
-- **Configurable input mapping from JSON** — deferred. No action/event system exists to map to. The indirection layer would map to exactly one hardcoded behavior (movement). Build mapping when there are multiple actions to map between.
+- **Configurable input mapping from JSON** — deferred. No action/event system exists to map to.
 - **Analog stick dead zone tuning** — use a simple threshold constant. Fine-tune later.
-- **Physics_Component.max_speed** — not needed until per-entity speed variance exists in a real game scene.
+- **Physics_Component.max_speed** — not needed until per-entity speed variance exists.
 - **Dense ECS arrays** — deferred to post-V1 per existing design decisions.
+- **Trigger colliders / overlap events** — no event system to consume them. Add when behaviors exist.
+- **Collision layers / masks** — all solid colliders collide with all other solid colliders. Layer filtering is a flags extension for later.
+- **Continuous collision detection (CCD)** — at 2px/frame with 32px entities, tunneling isn't possible. Swept AABB can be added if speeds increase dramatically.
+- **One-way platforms** — needs a direction flag + special resolution logic. Deferring.
 
 ## Open Questions
 
