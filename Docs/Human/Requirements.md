@@ -39,6 +39,30 @@ Audio
 Render related  
 
 
+## Physics
+    1. Velocity — each entity can have a speed in x and y (pixels per frame)
+    2. Gravity — per-entity, configurable direction (down, up, left, right) and strength. Set to 0 for no gravity
+    3. No collision yet — that's a separate step. Entities can overlap and fall off screen
+
+### How it works
+Physics component stores velocity and gravity. Each frame: gravity adds to velocity, velocity adds to position. That's it.
+
+System execution order:
+    1. Input (read controller, set velocity)
+    2. Physics (apply gravity + velocity to position)
+    3. Render (draw)
+
+## Input
+    1. One controller. PSP only has one
+    2. No per-entity input data. An entity either responds to input or it doesn't — just a flag
+    3. D-pad and analog stick set velocity on the entity's physics component
+    4. Movement speed is hardcoded for now. No per-entity speed field until it's needed
+    5. Button mapping is hardcoded. No configurable mapping until there's an action system to map to
+
+### Why input needs physics
+Input writes velocity. Physics reads velocity and moves the entity. Without physics, input has nowhere to write to.
+
+
 # IMPROVEMENT
 ## Engine
 Code Stripping + recompiling instead of using a static compiled engine -> also language support other than plain English

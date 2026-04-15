@@ -29,8 +29,8 @@ unsigned char* load_scene(Arena* arena, const char* path){
     SceUID fd = sceIoOpen(path, PSP_O_RDONLY, 0);
     if (fd < 0) return NULL;
 
-    SceOff file_size = sceIoLseek(fd, 0, SEEK_END);
-    sceIoLseek(fd, 0, SEEK_SET);
+    SceOff file_size = sceIoLseek(fd, 0, PSP_SEEK_END);
+    sceIoLseek(fd, 0, PSP_SEEK_SET);
 
     unsigned char* bytes = Arena_Alloc(arena, (size_t)file_size);
     if (!bytes) { sceIoClose(fd); return NULL; }

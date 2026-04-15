@@ -27,10 +27,12 @@ User places sprites in editor → exports → runs Python compiler → loads EBO
 ## M2 — Interactivity
 Make things move and collide.
 
-- [ ] Physics component (velocity, gravity)
-- [ ] Physics system (apply velocity, gravity each frame)
-- [ ] Collision detection (AABB on Collider_Component)
-- [ ] Player controller (map input → movement on a specific entity)
+- [ ] Physics component (vx, vy, gravity magnitude + direction per entity)
+- [ ] Physics system (apply gravity to velocity, velocity to position each frame)
+- [ ] Input system (read controller once per frame, write velocity to entities with COMP_INPUT)
+- [ ] Pipeline update (pack physics data into binary blob after colliders)
+- [ ] Scene parser update (load physics array from blob)
+- [ ] Collision detection (AABB on Collider_Component, separate step after physics+input work)
 - [ ] Basic audio (background music streaming + SFX)
 
 ### M2 Result

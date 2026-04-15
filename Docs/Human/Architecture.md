@@ -145,38 +145,65 @@ Notes:
 Stop_playing_sound(int sound_identifier);
 
 
-// higher level fuctions
-jump();
-fall_towards();
-physics_system();
-render_system();
+// higher level functions
+
+/*
+Physics system — runs every frame.
+Applies gravity to velocity, then velocity to position.
+Only touches entities with COMP_ACTIVE | COMP_PHYSICS | COMP_TRANSFORM.
+*/
+physics_system_update();
+
+/*
+Input system — runs every frame, before physics.
+Reads controller once (sceCtrlReadBufferPositive).
+Writes velocity to entities with COMP_ACTIVE | COMP_INPUT | COMP_PHYSICS.
+No per-entity config. One controller, one set of hardcoded bindings.
+*/
+input_system_update();
+
+render_system_update();
 
 ```
 
-### Planned Directory tree
+### Directory tree
 
 ```text
-psp_engine/
-├── Makefile                 # Standard PSPSDK makefile for building the project
-├── src/                     # Source code (.c files)
-│   ├── main.c               # Entry point, PSP hardware initialization, and the Main Game Loop
-│   ├── core/                # Core engine infrastructure
-│   │   ├── memory.c         # Memory management (Custom Arena Allocators)
-│   │   └── ecs.c            # Entity Component System (Entity ID generation, component registry)
-│   ├── systems/             # System logic that processes components
-│   │   ├── physics.c        # Processes collisions and movement updates
-│   │   ├── render.c         # Handles drawing to screen via PSP's libgu/libgum
-│   │   └── audio.c          # Hardware audio playback management
-│   └── loaders/             # Parsing and loading runtime data
-│       ├── scene_parser.c   # Parses the binary scene blob into ECS memory
-│       └── asset_loader.c   # Loads textures/audio into the appropriate arrays
-├── include/                 # Public headers (.h files) corresponding to src/
-│   ├── core/
-│   ├── systems/
-│   ├── components/          # Pure Data Structures (transform.h, sprite.h, collider.h)
-│   └── psp_utils.h          # Helper macros and PSP specific definitions
-├── assets/                  # Raw game assets (converted during build)
-└── docs/                    # Engine documentation
+Engine/
+├── Makefile
+├── include/
+│   └── systems/
+│       └── render.h
+└── src/
+    ├── main.c                  # Entry point, PSP init, main loop
+    ├── components/             # Pure data structs, no logic
+    │   ├── audio.h
+    │   ├── collider.h
+    │   ├── physics.h
+    │   ├── player_controlled.h
+    │   ├── sprite.h
+    │   └── transform.h
+    ├── core/
+    │   ├── ecs.c / ecs.h       # Entity IDs, component masks, parallel arrays
+    │   └── memory.c / memory.h # Arena allocator
+    ├── loaders/
+    │   ├── asset_loader.c / .h # Textures into RAM/VRAM
+    │   └── scene_parser.c      # Binary blob into ECS arrays
+    └── systems/
+        ├── systems.h           # Shared system headers
+        ├── audio.c             # Audio playback
+        ├── physics.c           # Velocity + gravity each frame
+        └── render.c            # Draw via libgu/libgum
+```
+
+Build output
+```text
+build/
+├── EBOOT.PBP
+├── scenes/
+│   ├── scene.bin
+│   └── tex_*.raw
+└── src/                        # .o files
 ```
 
 ### Key Technical Concepts
