@@ -5,6 +5,7 @@ OBJS = build/src/main.o \
        build/src/systems/physics.o \
        build/src/systems/input.o \
        build/src/systems/collision.o \
+       build/src/systems/audio.o \
        build/src/core/memory.o \
        build/src/core/ecs.o \
        build/src/loaders/scene_parser.o \
@@ -17,7 +18,7 @@ ASFLAGS = $(CFLAGS)
 
 LIBDIR =
 LDFLAGS =
-LIBS = -lpspgu -lpspgum -lm
+LIBS = -lpspgu -lpspgum -lpspaudio -lm
 
 PSP_EBOOT_TITLE = PSP Engine
 PSP_EBOOT = build/EBOOT.PBP

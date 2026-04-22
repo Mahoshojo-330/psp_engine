@@ -9,6 +9,7 @@ Binary format (all little-endian, matches PSP MIPS LE):
     [Sprite_Component[entity_count]]        8 * n   bytes : int global_texture_id, uint32 colour_tint
     [Collider_Component[entity_count]]      20 * n  bytes : float offset_x, float offset_y, float width, float height, uint32 flags
     [Physics_Component[entity_count]]       16 * n  bytes : float vx, float vy, float gravity_magnitude, uint8 gravity_direction, 3 pad
+    [Audio_Component[entity_count]]         12 * n  bytes : int sound_id, float volume, uint8 loop, uint8 state, 2 pad
 
 Component bit assignments (must match Engine/src/core/ecs.h):
     COMP_ACTIVE    = 1 << 0
@@ -17,6 +18,7 @@ Component bit assignments (must match Engine/src/core/ecs.h):
     COMP_COLLIDER  = 1 << 3
     COMP_PHYSICS   = 1 << 4
     COMP_INPUT     = 1 << 5
+    COMP_AUDIO     = 1 << 6
 
 */
 
@@ -50,5 +52,6 @@ void parse_scene(unsigned char* bytes){
     memcpy(transforms, bytes + (4 * n) + 4,  n * sizeof(Transform_Component));
     memcpy(sprites,    bytes + (20 * n) + 4, n * sizeof(Sprite_Component));
     memcpy(colliders,  bytes + (28 * n) + 4, n * sizeof(Collider_Component));
-    memcpy(physics,    bytes + (48 * n) + 4, n * sizeof(Physics_Component));
+    memcpy(physics,           bytes + (48 * n) + 4, n * sizeof(Physics_Component));
+    memcpy(audio_components,  bytes + (64 * n) + 4, n * sizeof(Audio_Component));
 }

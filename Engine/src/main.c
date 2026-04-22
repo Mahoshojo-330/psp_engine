@@ -42,24 +42,28 @@ int main(int argc, char** argv) {
     Arena_Init(&arena, sceKernelTotalFreeMemSize());
     initGu();
     input_init();
+    audio_init();
 
     /* Load scene and textures */
     unsigned char* scene_bytes = load_scene(&arena, "scenes/scene.bin");
     if (scene_bytes) {
         parse_scene(scene_bytes);
         load_scene_textures(&arena, "scenes");
+        load_scene_audio(&arena, "scenes");
     }
 
     while(running) {
         input_system_update();
         physics_system_update();
         collision_system_update();
+        audio_system_update();
 
         startFrame();
         render_system_update();
         endFrame();
     }
 
+    audio_cleanup();
     endGu();
     sceKernelExitGame();
     return 0;

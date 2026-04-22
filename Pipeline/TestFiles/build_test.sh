@@ -12,4 +12,7 @@ python3 ../magic_bridge.py test_scene.json ../../Engine/build/scenes/scene.bin
 echo "=== Converting textures ==="
 python3 ../texture_converter.py ./ ../../Engine/build/scenes/
 
+echo "=== Converting audio ==="
+python3 ../audio_converter.py ./ ../../Engine/build/scenes/
+
 echo "=== Done ==="

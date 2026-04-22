@@ -11,6 +11,7 @@ Binary format (all little-endian, matches PSP MIPS LE):
     [Sprite_Component[entity_count]]       8 bytes each: int global_texture_id, uint32 colour_tint
     [Collider_Component[entity_count]]    20 bytes each: float offset_x, float offset_y, float width, float height, uint32 flags
     [Physics_Component[entity_count]]     16 bytes each: float vx, float vy, float gravity_magnitude, uint8 gravity_direction, 3 pad
+    [Audio_Component[entity_count]]       12 bytes each: int sound_id, float volume, uint8 loop, uint8 state, 2 pad
 
 Component bit assignments (must match Engine/src/core/ecs.h):
     COMP_ACTIVE    = 1 << 0
@@ -19,6 +20,7 @@ Component bit assignments (must match Engine/src/core/ecs.h):
     COMP_COLLIDER  = 1 << 3
     COMP_PHYSICS   = 1 << 4
     COMP_INPUT     = 1 << 5
+    COMP_AUDIO     = 1 << 6
 
 Usage:
     python magic_bridge.py scene.json scene.bin
@@ -36,6 +38,7 @@ COMP_SPRITE    = 1 << 2
 COMP_COLLIDER  = 1 << 3
 COMP_PHYSICS   = 1 << 4
 COMP_INPUT     = 1 << 5
+COMP_AUDIO     = 1 << 6
 
 MAX_ENTITIES = 256
 
@@ -44,11 +47,13 @@ FMT_TRANSFORM = '<ffii'    # x, y, width, height          = 16 bytes
 FMT_SPRITE    = '<iI'      # global_texture_id, colour_tint = 8 bytes
 FMT_COLLIDER  = '<ffffI'   # offset_x, offset_y, w, h, flags = 20 bytes
 FMT_PHYSICS   = '<fffB3x'  # vx, vy, gravity_magnitude, gravity_direction + 3 pad = 16 bytes
+FMT_AUDIO     = '<ifBB2x'  # sound_id, volume, loop, state + 2 pad = 12 bytes
 
 ZERO_TRANSFORM = struct.pack(FMT_TRANSFORM, 0.0, 0.0, 0, 0)
 ZERO_SPRITE    = struct.pack(FMT_SPRITE, 0, 0)
 ZERO_COLLIDER  = struct.pack(FMT_COLLIDER, 0.0, 0.0, 0.0, 0.0, 0)
 ZERO_PHYSICS   = struct.pack(FMT_PHYSICS, 0.0, 0.0, 0.0, 0)
+ZERO_AUDIO     = struct.pack(FMT_AUDIO, 0, 0.0, 0, 0)
 
 
 def compile_scene(scene: dict) -> bytes:
@@ -64,6 +69,7 @@ def compile_scene(scene: dict) -> bytes:
     sprite_data = []
     collider_data = []
     physics_data = []
+    audio_data = []
 
     for entity in entities:
         mask = COMP_ACTIVE  # all exported entities are active
@@ -119,6 +125,20 @@ def compile_scene(scene: dict) -> bytes:
         else:
             physics_data.append(ZERO_PHYSICS)
 
+        # Audio
+        if "audio" in components:
+            mask |= COMP_AUDIO
+            a = components["audio"]
+            audio_data.append(struct.pack(
+                FMT_AUDIO,
+                int(a["sound_id"]),
+                float(a.get("volume", 1.0)),
+                int(a.get("loop", 0)),
+                2   # state = pending (auto-play on scene load)
+            ))
+        else:
+            audio_data.append(ZERO_AUDIO)
+
         # Input (zero-size component, just a mask bit)
         if entity.get("player_controlled", False):
             mask |= COMP_INPUT
@@ -138,6 +158,8 @@ def compile_scene(scene: dict) -> bytes:
         blob += c
     for p in physics_data:
         blob += p
+    for a in audio_data:
+        blob += a
 
     return bytes(blob)
 

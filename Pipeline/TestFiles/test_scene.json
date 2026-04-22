@@ -26,6 +26,11 @@
                 "transform": { "x": 0.0, "y": 240.0, "width": 480, "height": 32 },
                 "collider": { "offset_x": 0.0, "offset_y": 0.0, "width": 480.0, "height": 32.0, "flags": 1 }
             }
+        },
+        {
+            "components": {
+                "audio": { "sound_id": 0, "volume": 1.0, "loop": 1 }
+            }
         }
     ]
 }

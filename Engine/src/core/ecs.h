@@ -20,6 +20,7 @@ magic_bridge.py must match these bit assignments exactly.
 #include "../components/sprite.h"
 #include "../components/collider.h"
 #include "../components/physics.h"
+#include "../components/audio.h"
 
 #define MAX_ENTITIES 256
 
@@ -32,7 +33,7 @@ enum {
     COMP_COLLIDER   = 1 << 3,
     COMP_PHYSICS    = 1 << 4,   /* M2 */
     COMP_INPUT      = 1 << 5,
-    /* COMP_AUDIO   = 1 << 6,      M2 */
+    COMP_AUDIO      = 1 << 6,
 };
 
 
@@ -43,6 +44,7 @@ extern Transform_Component transforms[MAX_ENTITIES];
 extern Sprite_Component    sprites[MAX_ENTITIES];
 extern Collider_Component  colliders[MAX_ENTITIES];
 extern Physics_Component   physics[MAX_ENTITIES];
+extern Audio_Component     audio_components[MAX_ENTITIES];
 
 
 /*

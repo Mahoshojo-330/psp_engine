@@ -21,6 +21,8 @@ void collision_system_update(void);
 
 
 // --- Audio System ---
-// void audio_system_update(void);
+void audio_init(void);
+void audio_system_update(void);
+void audio_cleanup(void);
 
 #endif

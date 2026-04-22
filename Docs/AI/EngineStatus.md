@@ -8,7 +8,7 @@ Last updated: 2026-04-15
 - [x] **Component Structs** — `Transform_Component` (16B), `Sprite_Component` (8B), `Collider_Component` (20B), `Physics_Component` (16B) all defined and tightly packed.
 - [x] **GPU Structs** — `TextureVertex`, `Texture` in `include/systems/render.h`.
 - [x] **Main Loop Skeleton** — Callbacks, arena init, GU init, vsync loop.
-- [x] **Makefile** — Compiles main.o, render.o, memory.o, ecs.o, scene_parser.o, asset_loader.o, physics.o, input.o with libgu/libgum.
+- [x] **Makefile** — Compiles main.o, render.o, memory.o, ecs.o, scene_parser.o, asset_loader.o, physics.o, input.o, collision.o, audio.o with libgu/libgum/libpspaudio.
 - [x] **ECS Core** (`core/ecs.c/.h`) — Global parallel arrays indexed by entity ID (MAX_ENTITIES=256), per-entity component bitmask, `ECS_Clean()`. Component type enum is the contract between engine and pipeline.
 - [x] **Binary Scene Format** — Defined. Layout: `[uint32 entity_count][uint32 masks[N]][Transform[N]][Sprite[N]][Collider[N]][Physics[N]]`, all little-endian. Every entity gets a slot in every component array; mask determines validity.
 - [x] **Python Compiler** (`Pipeline/magic_bridge.py`) — JSON → binary blob. Reads scene.json, packs component data matching C struct layouts (including physics), outputs blob ready for fread.
@@ -21,8 +21,10 @@ Last updated: 2026-04-15
 - [x] **Main Loop Wiring** — Execution order: `input_system_update()` → `physics_system_update()` → `collision_system_update()` → `startFrame()` → `render_system_update()` → `endFrame()`.
 - [x] **Collision System** (`systems/collision.c`) — Brute-force O(N²) AABB overlap detection on entities with `COMP_ACTIVE | COMP_COLLIDER | COMP_TRANSFORM`. Resolution: minimum penetration axis push-apart when both colliders have `is_solid` (flags bit 0). Dynamic entities (`COMP_PHYSICS`) get pushed; static entities are immovable. Velocity zeroed on collision axis to prevent gravity accumulation.
 
+- [x] **Audio System — SFX** (`systems/audio.c`) — Non-blocking SFX playback via PSP hardware channels. `audio_init()` reserves channels 1-7 (channel 0 reserved for future BGM). `audio_system_update()` iterates ACTIVE+AUDIO entities, manages channel assignment, and feeds PCM chunks via `sceAudioOutput()` (non-blocking). Supports per-entity volume, looping, and a pending/playing/stopped state machine. Audio assets are pre-decoded mono PCM `.raw` files loaded into arena memory by `load_scene_audio()` (same pattern as texture loading). Pipeline: `audio_converter.py` converts WAV to `.raw` PCM with mono downmix. `magic_bridge.py` packs `Audio_Component` into the binary blob after physics.
+
 ## Not Started (Priority Order)
-2. **Audio System** (`systems/audio.c`) — Background music streaming + SFX playback. `audio.h` stub exists (comments only, no struct).
+2. **Audio System — BGM Streaming** — Background music via OGG Vorbis streamed from disc with a dedicated PSP kernel thread. Requires `libvorbisfile`. Planned as Step 2 in `Docs/AI/Specefic_Approach/Audio.md`.
 
 ## Design Decisions Resolved
 - **ECS storage:** Parallel arrays indexed by entity ID with global allocation (not arena). Arena is reserved for scene-transient data (textures, etc.). Dense arrays deferred to post-V1.
@@ -31,7 +33,7 @@ Last updated: 2026-04-15
 - **Scene transition:** `ECS_Clean()` zeroes entity_count + masks. Arena_Reset for transient scene data.
 
 ## Known Design Decisions Still Open
-- **Audio_Component struct:** Needs sound_id, loop flag, volume. Not yet defined.
+- **Audio_Component struct:** Defined (12 bytes): `int sound_id`, `float volume`, `uint8_t loop`, `uint8_t state`, 2 padding. State machine: 0=stopped, 1=playing, 2=pending. Entities auto-play on scene load (state=pending from blob).
 - **Atlas upgrade (post-V1):** Currently individual textures with per-entity texture bind. Atlas would reduce binds to one per frame — purely a pipeline change (packing + UV rect table), ~20 lines of render code difference. Worth doing when sprite count grows.
 - **Player gravity interaction:** Input system overwrites `vx`/`vy` each frame, so gravity doesn't accumulate on player-controlled entities. If jumping is needed, input would set only horizontal velocity and let physics handle vertical.
 - **Configurable input mapping:** Deferred. No action/event system to map to yet. D-pad/analog = movement is hardcoded.

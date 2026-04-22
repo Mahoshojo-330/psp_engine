@@ -53,7 +53,7 @@ Total: 20 bytes. Gravity direction as uint8 enum rather than storing a normalize
 
 **Input mapping:** Hardcoded for V1. D-pad/analog = movement, face buttons = TBD (jump, interact — these need an action/event system that doesn't exist yet). Configurable JSON mapping is deferred until there's a behavior system to map inputs TO. Reading all buttons is free (one API call returns everything), but the *mapping layer* has nothing to map to right now.
 
-### Step 3: Collision Detection — NOT STARTED
+### Step 3: Collision Detection — DONE
 
 Separate system from physics. New file `src/systems/collision.c` with `collision_system_update()`.
 
@@ -134,3 +134,5 @@ Input before physics so velocity is set before it's consumed. Physics before col
 
 - **Gravity per-entity vs global:** Current plan is per-entity (set in editor). Alternative: single global gravity value. Per-entity is more flexible (platformer + floating UI elements in same scene) at 5 extra bytes per entity — worth it.
 - **Frame-rate dependent movement:** V1 uses pixels/frame (vsync locked to 60fps on PSP). Delta-time can be added later if needed, but vsync lock makes it unnecessary for now.
+
+
