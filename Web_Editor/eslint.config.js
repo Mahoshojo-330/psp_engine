@@ -40,4 +40,14 @@ export default defineConfig([
       }],
     },
   },
+  {
+    files: ['src/io/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': ['error', {
+        patterns: [
+          { group: ['**/ui/**', '**/ui'], message: 'io/ must not import from ui/ (hexagonal boundary)' },
+        ],
+      }],
+    },
+  },
 ])
