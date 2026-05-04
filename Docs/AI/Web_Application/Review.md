@@ -19,3 +19,5 @@ Findings from review of commit `0dd1212` "WebApplication V1.5".
 7. **`EMPTY_SCENE` is a module-level shared object** (`EditorCore.ts:4`). Two `EditorCore` instances start with identical references. Currently safe because mutation always replaces `this.scene`, never mutates in place — but it's a pun waiting to bite. Cheap fix: inline `{ entities: [], selectedEntityId: null }` in the field initializer.
 
 8. **Number input UX edge case.** `PropertyPanel.tsx:69-72` — typing `1.` or `-` mid-edit will round/parse and overwrite the input, making decimals annoying to enter. Known controlled-input issue; acceptable for V1.5, but flag it as a V2 polish item.
+
+claude --resume 69957cf8-17f3-41da-a5d9-1a056463f86a
