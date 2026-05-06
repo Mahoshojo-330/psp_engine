@@ -1,10 +1,8 @@
 import type { ComponentSchema, Entity, EntityId, Scene } from './types'
 import { REGISTRY } from '../schemas/registry'
 
-const EMPTY_SCENE: Scene = { entities: [], selectedEntityId: null }
-
 export class EditorCore {
-  private scene: Scene = EMPTY_SCENE
+  private scene: Scene = { entities: [], selectedEntityId: null }
   private listeners = new Set<() => void>()
   private nextId: EntityId = 1
 
@@ -44,6 +42,14 @@ export class EditorCore {
     fieldName: string,
     value: unknown,
   ): void => {
+    this.setFields(id, componentKey, { [fieldName]: value })
+  }
+
+  setFields = (
+    id: EntityId,
+    componentKey: string,
+    partial: Record<string, unknown>,
+  ): void => {
     const entities = this.scene.entities
     const idx = entities.findIndex(e => e.id === id)
     const old = entities[idx]
@@ -56,7 +62,7 @@ export class EditorCore {
       id: old.id,
       components: {
         ...old.components,
-        [componentKey]: { ...oldComponent, [fieldName]: value },
+        [componentKey]: { ...oldComponent, ...partial },
       },
     }
     const nextEntities = entities.slice()

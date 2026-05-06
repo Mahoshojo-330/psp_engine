@@ -48,8 +48,7 @@ export function Canvas({ core }: Props) {
     const here = screenToCanvas(svg, e.clientX, e.clientY)
     const nextX = drag.startEntity.x + (here.x - drag.startCanvas.x)
     const nextY = drag.startEntity.y + (here.y - drag.startCanvas.y)
-    core.setField(drag.entityId, transformSchema.key, 'x', nextX)
-    core.setField(drag.entityId, transformSchema.key, 'y', nextY)
+    core.setFields(drag.entityId, transformSchema.key, { x: nextX, y: nextY })
   }
 
   const endDrag = (e: ReactPointerEvent<SVGRectElement>) => {
@@ -61,12 +60,17 @@ export function Canvas({ core }: Props) {
     dragRef.current = null
   }
 
+  const onBackgroundClick = (e: ReactPointerEvent<SVGSVGElement>) => {
+    if (e.target === e.currentTarget) core.selectEntity(null)
+  }
+
   return (
     <svg
       className="canvas"
       viewBox="0 0 480 272"
       preserveAspectRatio="xMidYMid meet"
       xmlns="http://www.w3.org/2000/svg"
+      onPointerDown={onBackgroundClick}
     >
       {scene.entities.map(entity => {
         const transform = entity.components[transformSchema.key] as Transform | undefined
@@ -79,7 +83,7 @@ export function Canvas({ core }: Props) {
             y={transform.y}
             width={transform.width}
             height={transform.height}
-            aria-selected={selected}
+            data-selected={selected || undefined}
             onPointerDown={e => onPointerDown(e, entity.id, transform)}
             onPointerMove={onPointerMove}
             onPointerUp={endDrag}

@@ -145,7 +145,7 @@ body {
   fill: #6b7280;
 }
 
-.canvas rect[aria-selected="true"] {
+.canvas rect[data-selected] {
   fill: #2563eb;
   stroke: #93c5fd;
   stroke-width: 2;
@@ -183,6 +183,12 @@ body {
   padding: 1rem;
   color: #888;
   font-style: italic;
+}
+
+.property-panel-section + .property-panel-section {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid #2a2a2a;
 }
 
 .property-panel h2 {

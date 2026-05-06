@@ -10,6 +10,8 @@ export function screenToCanvas(
 ): CanvasPoint {
   const ctm = svg.getScreenCTM()
   if (!ctm) throw new Error('screenToCanvas: SVG has no CTM (detached from document?)')
+  // Hand-rolled 2D affine inverse: jsdom's DOMMatrix.inverse() is unreliable, and
+  // the CTMLike object the test stubs in doesn't have an .inverse() method anyway.
   const { a, b, c, d, e, f } = ctm
   const det = a * d - b * c
   if (det === 0) throw new Error('screenToCanvas: CTM is non-invertible')

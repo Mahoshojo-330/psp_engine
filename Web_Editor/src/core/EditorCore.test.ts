@@ -58,6 +58,21 @@ describe('EditorCore', () => {
     })
   })
 
+  it('setFields applies a partial update in a single emit', () => {
+    const core = new EditorCore()
+    const id = core.addEntity(['transform'])
+    const listener = vi.fn()
+    core.subscribe(listener)
+    core.setFields(id, 'transform', { x: 10, y: 20 })
+    expect(listener).toHaveBeenCalledTimes(1)
+    expect(core.getSnapshot().entities[0]?.components.transform).toEqual({
+      x: 10,
+      y: 20,
+      width: 32,
+      height: 32,
+    })
+  })
+
   it('setField throws when the entity does not exist', () => {
     const core = new EditorCore()
     expect(() => core.setField(999, 'transform', 'x', 0)).toThrow()

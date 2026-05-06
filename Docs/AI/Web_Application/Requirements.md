@@ -93,3 +93,5 @@ All 6 engine components, mirroring `Engine.md` §5 exactly:
 - **Sprite atlas, animation, rotation, scaling.** Engine doesn't support them.
 - **Texture/audio editing.** Preview only — editor never modifies asset bytes.
 - **Texture-format conversion.** That's the Python pipeline's job, not the editor's (Engine.md §1).
+
+
