@@ -121,6 +121,82 @@ describe('EditorCore', () => {
     expect(core.getSnapshot()).not.toBe(before)
   })
 
+  it('addComponent appends a component with default fields', () => {
+    const core = new EditorCore()
+    const id = core.addEntity(['transform'])
+    core.addComponent(id, 'physics')
+    const entity = core.getSnapshot().entities[0]!
+    expect(Object.keys(entity.components).sort()).toEqual(['physics', 'transform'])
+    expect(entity.components.physics).toEqual({
+      vx: 0,
+      vy: 0,
+      gravity_magnitude: 0.5,
+      gravity_direction: 0,
+    })
+  })
+
+  it('addComponent rejects unknown keys', () => {
+    const core = new EditorCore()
+    const id = core.addEntity(['transform'])
+    expect(() => core.addComponent(id, 'mystery')).toThrow()
+  })
+
+  it('addComponent rejects when requires are missing', () => {
+    const core = new EditorCore()
+    const id = core.addEntity([]) // no transform
+    expect(() => core.addComponent(id, 'physics')).toThrow(/requires/)
+  })
+
+  it('addComponent rejects duplicate components', () => {
+    const core = new EditorCore()
+    const id = core.addEntity(['transform'])
+    expect(() => core.addComponent(id, 'transform')).toThrow()
+  })
+
+  it('addComponent failure does not mutate the scene', () => {
+    const core = new EditorCore()
+    const id = core.addEntity([])
+    const before = core.getSnapshot()
+    expect(() => core.addComponent(id, 'physics')).toThrow()
+    expect(core.getSnapshot().entities).toBe(before.entities)
+  })
+
+  it('addComponent is one undo step', () => {
+    const core = new EditorCore()
+    const id = core.addEntity(['transform'])
+    core.addComponent(id, 'physics')
+    core.undo()
+    expect(Object.keys(core.getSnapshot().entities[0]!.components)).toEqual(['transform'])
+  })
+
+  it('removeComponent removes the component', () => {
+    const core = new EditorCore()
+    const id = core.addEntity(['transform', 'physics'])
+    core.removeComponent(id, 'physics')
+    expect(Object.keys(core.getSnapshot().entities[0]!.components)).toEqual(['transform'])
+  })
+
+  it('removeComponent rejects when another component requires it', () => {
+    const core = new EditorCore()
+    const id = core.addEntity(['transform', 'physics', 'collider'])
+    // collider requires transform, physics requires transform → can't remove transform
+    expect(() => core.removeComponent(id, 'transform')).toThrow(/requires/)
+  })
+
+  it('removeComponent rejects when the component is not on the entity', () => {
+    const core = new EditorCore()
+    const id = core.addEntity(['transform'])
+    expect(() => core.removeComponent(id, 'physics')).toThrow()
+  })
+
+  it('removeComponent is one undo step', () => {
+    const core = new EditorCore()
+    const id = core.addEntity(['transform', 'physics'])
+    core.removeComponent(id, 'physics')
+    core.undo()
+    expect(Object.keys(core.getSnapshot().entities[0]!.components).sort()).toEqual(['physics', 'transform'])
+  })
+
   it('mutations do not mutate prior snapshots', () => {
     const core = new EditorCore()
     const id = core.addEntity(['transform'])

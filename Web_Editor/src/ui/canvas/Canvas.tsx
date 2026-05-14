@@ -27,9 +27,10 @@ export function Canvas({ core }: Props) {
     entityId: EntityId,
     transform: Transform,
   ) => {
-    core.selectEntity(entityId)
     const svg = e.currentTarget.ownerSVGElement
     if (!svg) return
+    core.beginTransaction()
+    core.selectEntity(entityId)
     e.currentTarget.setPointerCapture(e.pointerId)
     const start = screenToCanvas(svg, e.clientX, e.clientY)
     dragRef.current = {
@@ -51,13 +52,24 @@ export function Canvas({ core }: Props) {
     core.setFields(drag.entityId, transformSchema.key, { x: nextX, y: nextY })
   }
 
-  const endDrag = (e: ReactPointerEvent<SVGRectElement>) => {
+  const onPointerUp = (e: ReactPointerEvent<SVGRectElement>) => {
     const drag = dragRef.current
     if (!drag || drag.pointerId !== e.pointerId) return
     if (e.currentTarget.hasPointerCapture(e.pointerId)) {
       e.currentTarget.releasePointerCapture(e.pointerId)
     }
     dragRef.current = null
+    core.commitTransaction()
+  }
+
+  const onPointerCancel = (e: ReactPointerEvent<SVGRectElement>) => {
+    const drag = dragRef.current
+    if (!drag || drag.pointerId !== e.pointerId) return
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId)
+    }
+    dragRef.current = null
+    core.abortTransaction()
   }
 
   const onBackgroundClick = (e: ReactPointerEvent<SVGSVGElement>) => {
@@ -86,8 +98,8 @@ export function Canvas({ core }: Props) {
             data-selected={selected || undefined}
             onPointerDown={e => onPointerDown(e, entity.id, transform)}
             onPointerMove={onPointerMove}
-            onPointerUp={endDrag}
-            onPointerCancel={endDrag}
+            onPointerUp={onPointerUp}
+            onPointerCancel={onPointerCancel}
           />
         )
       })}

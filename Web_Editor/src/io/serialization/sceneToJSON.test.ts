@@ -54,6 +54,27 @@ describe('sceneToJSON', () => {
     expect(json.entities[0]).not.toHaveProperty('player_controlled')
   })
 
+  it('lifts isFlag schemas (player_controlled) to a top-level entity boolean', () => {
+    const scene: Scene = {
+      entities: [
+        {
+          id: 1,
+          components: {
+            transform: { x: 100, y: 50, width: 32, height: 32 },
+            physics: { vx: 0, vy: 0, gravity_magnitude: 0.5, gravity_direction: 0 },
+            player_controlled: {},
+          },
+        },
+      ],
+      selectedEntityId: null,
+    }
+    const json = sceneToJSON(scene)
+    const entity = json.entities[0]!
+    expect(entity.player_controlled).toBe(true)
+    expect(entity.components).not.toHaveProperty('player_controlled')
+    expect(Object.keys(entity.components).sort()).toEqual(['physics', 'transform'])
+  })
+
   it('throws on unknown component key', () => {
     const scene: Scene = {
       entities: [{ id: 1, components: { mystery: {} } }],

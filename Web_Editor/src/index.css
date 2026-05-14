@@ -47,6 +47,23 @@ body {
   margin-left: 0.5rem;
 }
 
+.toolbar button:disabled {
+  background: #1f2937;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+.toolbar .entity-preset-select {
+  background: #2563eb;
+  color: white;
+  border: 0;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font: inherit;
+  margin-right: 0.5rem;
+}
+
 .json-view {
   background: #1a1a1a;
   color: #e0e0e0;
@@ -226,4 +243,69 @@ body {
 .property-panel .field input:focus {
   outline: 1px solid #2563eb;
   border-color: #2563eb;
+}
+
+.property-panel .field input[type="checkbox"] {
+  flex: 0 0 auto;
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+}
+
+.property-panel .field select {
+  flex: 1;
+  padding: 0.25rem 0.5rem;
+  background: #111;
+  border: 1px solid #333;
+  color: #e0e0e0;
+  border-radius: 3px;
+  font: inherit;
+}
+
+.property-panel-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.property-panel-section-header h2 {
+  margin: 0;
+}
+
+.remove-component {
+  background: transparent;
+  border: 1px solid #444;
+  color: #bbb;
+  padding: 0.125rem 0.5rem;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.remove-component:hover:not(:disabled) {
+  background: #2a2a2a;
+  border-color: #666;
+  color: #e0e0e0;
+}
+
+.remove-component:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.add-component {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #2a2a2a;
+}
+
+.add-component select {
+  width: 100%;
+  padding: 0.4rem 0.5rem;
+  background: #111;
+  border: 1px solid #333;
+  color: #e0e0e0;
+  border-radius: 3px;
+  font: inherit;
 }

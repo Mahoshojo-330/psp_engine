@@ -1,8 +1,15 @@
 export type EntityId = number
 
+export interface EnumOption {
+  value: number
+  label: string
+}
+
 export type FieldKind =
   | { kind: 'int'; min?: number; max?: number }
   | { kind: 'float'; min?: number; max?: number }
+  | { kind: 'bool' }
+  | { kind: 'enum'; options: readonly EnumOption[] }
 
 export interface FieldSchema {
   name: string
@@ -41,4 +48,9 @@ export interface Entity {
 export interface Scene {
   entities: readonly Entity[]
   selectedEntityId: EntityId | null
+}
+
+export interface EditorSnapshot extends Scene {
+  canUndo: boolean
+  canRedo: boolean
 }

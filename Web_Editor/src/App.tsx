@@ -3,7 +3,10 @@ import type { EditorCore } from './core/EditorCore'
 import { sceneToJSON } from './io/serialization/sceneToJSON'
 import { Canvas } from './ui/canvas/Canvas'
 import { EntityList } from './ui/EntityList'
+import { EntityPresets } from './ui/EntityPresets'
+import { useScene } from './ui/hooks/useScene'
 import { JsonView } from './ui/JsonView'
+import { useUndoRedoShortcuts } from './ui/keybindings/useUndoRedoShortcuts'
 import { PropertyPanel } from './ui/PropertyPanel'
 
 interface Props {
@@ -12,13 +15,19 @@ interface Props {
 
 export default function App({ core }: Props) {
   const [jsonOpen, setJsonOpen] = useState(false)
-  const json = jsonOpen ? JSON.stringify(sceneToJSON(core.getSnapshot()), null, 2) : ''
+  const snapshot = useScene(core)
+  const json = jsonOpen ? JSON.stringify(sceneToJSON(snapshot), null, 2) : ''
+  useUndoRedoShortcuts(core)
 
   return (
     <div className="app">
       <header className="toolbar">
-        <button type="button" onClick={() => core.addEntity(['transform'])}>
-          Add Entity
+        <EntityPresets core={core} />
+        <button type="button" onClick={() => core.undo()} disabled={!snapshot.canUndo}>
+          Undo
+        </button>
+        <button type="button" onClick={() => core.redo()} disabled={!snapshot.canRedo}>
+          Redo
         </button>
         <button type="button" onClick={() => setJsonOpen(true)}>
           Show JSON
