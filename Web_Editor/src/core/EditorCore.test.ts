@@ -45,6 +45,32 @@ describe('EditorCore', () => {
     expect(core.getSnapshot().selectedEntityId).toBeNull()
   })
 
+  it('addEntityWithTransform creates a positioned, selected entity', () => {
+    const core = new EditorCore()
+    const id = core.addEntityWithTransform(['transform'], { x: 10, y: 20, width: 40, height: 50 })
+    const scene = core.getSnapshot()
+    expect(scene.entities).toHaveLength(1)
+    expect(scene.entities[0]?.components.transform).toEqual({ x: 10, y: 20, width: 40, height: 50 })
+    expect(scene.selectedEntityId).toBe(id)
+  })
+
+  it('addEntityWithTransform is a single undo step (create + position + select)', () => {
+    const core = new EditorCore()
+    core.addEntityWithTransform(['transform'], { x: 5, y: 5, width: 8, height: 8 })
+    core.undo()
+    const scene = core.getSnapshot()
+    expect(scene.entities).toHaveLength(0)
+    expect(scene.selectedEntityId).toBeNull()
+  })
+
+  it('addEntityWithTransform aborts cleanly when transform is absent (no partial entity)', () => {
+    const core = new EditorCore()
+    expect(() => core.addEntityWithTransform([], { x: 0, y: 0, width: 8, height: 8 })).toThrow()
+    const scene = core.getSnapshot()
+    expect(scene.entities).toHaveLength(0)
+    expect(scene.canUndo).toBe(false)
+  })
+
   it('setField updates the targeted component field', () => {
     const core = new EditorCore()
     const id = core.addEntity(['transform'])

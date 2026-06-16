@@ -6,7 +6,9 @@ export interface EnumOption {
 }
 
 export type FieldKind =
-  | { kind: 'int'; min?: number; max?: number }
+  // `snap: 'pow2'` hard-snaps the value to the nearest power of two on commit —
+  // used for render sizes the PSP must store as power-of-two textures.
+  | { kind: 'int'; min?: number; max?: number; snap?: 'pow2' }
   | { kind: 'float'; min?: number; max?: number }
   | { kind: 'bool' }
   | { kind: 'enum'; options: readonly EnumOption[] }

@@ -1,14 +1,19 @@
 import { useEffect, useRef, useState } from 'react'
+import type { AssetStore } from '../assets/AssetStore'
 import type { EditorCore } from '../core/EditorCore'
 import type { ComponentSchema, Entity, FieldSchema } from '../core/types'
 import { REGISTRY } from '../schemas/registry'
+import { spriteSchema } from '../schemas/sprite'
 import { useScene } from './hooks/useScene'
+import { snapToPowerOfTwo } from './snap'
+import { SpriteControl } from './SpriteControl'
 
 interface Props {
   core: EditorCore
+  assetStore: AssetStore
 }
 
-export function PropertyPanel({ core }: Props) {
+export function PropertyPanel({ core, assetStore }: Props) {
   const scene = useScene(core)
   const entity =
     scene.selectedEntityId == null
@@ -63,15 +68,19 @@ export function PropertyPanel({ core }: Props) {
             removeDisabled={required}
             removeTitle={required ? 'Required by another component on this entity' : undefined}
           >
-            <ComponentFields
-              schema={schema}
-              data={data}
-              onFieldChange={(fieldName, value) =>
-                core.setField(entity.id, key, fieldName, value)
-              }
-              onBeginEdit={() => core.beginTransaction()}
-              onCommitEdit={() => core.commitTransaction()}
-            />
+            {key === spriteSchema.key ? (
+              <SpriteControl core={core} entityId={entity.id} data={data} assetStore={assetStore} />
+            ) : (
+              <ComponentFields
+                schema={schema}
+                data={data}
+                onFieldChange={(fieldName, value) =>
+                  core.setField(entity.id, key, fieldName, value)
+                }
+                onBeginEdit={() => core.beginTransaction()}
+                onCommitEdit={() => core.commitTransaction()}
+              />
+            )}
           </ComponentSection>
         )
       })}
@@ -208,6 +217,7 @@ function FieldInput({ field, value, onChange, onBeginEdit, onCommitEdit }: Field
 function NumberFieldInput({ field, value, onChange, onBeginEdit, onCommitEdit }: FieldInputProps) {
   const inputId = `field-${field.name}`
   const isInt = field.kind.kind === 'int'
+  const snapsToPow2 = field.kind.kind === 'int' && field.kind.snap === 'pow2'
   const numericValue = typeof value === 'number' ? value : 0
   const [text, setText] = useState(() => formatNumber(numericValue))
   const focusedRef = useRef(false)
@@ -235,8 +245,10 @@ function NumberFieldInput({ field, value, onChange, onBeginEdit, onCommitEdit }:
           focusedRef.current = false
           const parsed = isInt ? Number.parseInt(text, 10) : Number.parseFloat(text)
           if (Number.isFinite(parsed)) {
-            if (parsed !== numericValue) onChange(parsed)
-            setText(formatNumber(parsed))
+            // Hard-snap power-of-two sizes on commit (e.g. typing 30 settles to 32).
+            const next = snapsToPow2 ? snapToPowerOfTwo(parsed) : parsed
+            if (next !== numericValue) onChange(next)
+            setText(formatNumber(next))
           } else {
             setText(formatNumber(numericValue))
           }

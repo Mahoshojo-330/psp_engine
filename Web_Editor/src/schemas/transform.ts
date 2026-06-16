@@ -10,8 +10,8 @@ export interface Transform {
 const fields: FieldSchema[] = [
   { name: 'x',      label: 'X',      kind: { kind: 'float' },          default: 0  },
   { name: 'y',      label: 'Y',      kind: { kind: 'float' },          default: 0  },
-  { name: 'width',  label: 'Width',  kind: { kind: 'int', min: 0 },    default: 32 },
-  { name: 'height', label: 'Height', kind: { kind: 'int', min: 0 },    default: 32 },
+  { name: 'width',  label: 'Width',  kind: { kind: 'int', min: 0, snap: 'pow2' }, default: 32 },
+  { name: 'height', label: 'Height', kind: { kind: 'int', min: 0, snap: 'pow2' }, default: 32 },
 ]
 
 export const transformSchema: ComponentSchema<Transform> = {

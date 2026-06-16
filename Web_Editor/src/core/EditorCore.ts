@@ -48,6 +48,26 @@ export class EditorCore {
     return id
   }
 
+  // Create an entity (which must include a 'transform' component) at a specific
+  // position and size, then select it — all as a single undoable step. Used by
+  // canvas drag-to-draw. Aborts cleanly (no partial entity) if 'transform' is absent.
+  addEntityWithTransform = (
+    componentKeys: readonly string[],
+    transform: { x: number; y: number; width: number; height: number },
+  ): EntityId => {
+    this.beginTransaction()
+    try {
+      const id = this.addEntity(componentKeys)
+      this.setFields(id, 'transform', { ...transform })
+      this.selectEntity(id)
+      this.commitTransaction()
+      return id
+    } catch (err) {
+      this.abortTransaction()
+      throw err
+    }
+  }
+
   selectEntity = (id: EntityId | null): void => {
     if (this.scene.selectedEntityId === id) return
     this.pushHistory(this.scene)

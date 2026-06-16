@@ -21,6 +21,7 @@ interface ExpectedRow {
 
 const expected: readonly ExpectedRow[] = [
   { key: 'transform',         maskBit: 1, sizeBytes: 16, fields: ['x', 'y', 'width', 'height'] },
+  { key: 'sprite',            maskBit: 2, sizeBytes: 8,  fields: ['global_texture_id', 'colour_tint'] },
   { key: 'collider',          maskBit: 3, sizeBytes: 20, fields: ['offset_x', 'offset_y', 'width', 'height', 'is_solid'] },
   { key: 'physics',           maskBit: 4, sizeBytes: 16, fields: ['vx', 'vy', 'gravity_magnitude', 'gravity_direction'] },
   { key: 'player_controlled', maskBit: 5, sizeBytes: 0,  fields: [], isFlag: true },
