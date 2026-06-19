@@ -46,18 +46,18 @@ The whole system is one data pipeline. Each stage does one job and hands off a
 well-defined artifact to the next.
 
 ```
-   ┌──────────────────┐        ┌──────────────────┐        ┌──────────────────┐
-   │   WEB EDITOR      │        │     PIPELINE      │        │   PSP ENGINE      │
-   │   (React + TS)    │        │     (Python)      │        │   (C / PSPSDK)    │
-   │                   │        │                   │        │                   │
-   │  Place entities   │ scene  │  magic_bridge.py  │ binary │  scene_parser     │
-   │  Edit components  │ .json  │  texture_conv.py  │ blob + │  ECS arrays       │
-   │  Manage assets    │ ─────► │  audio_conv.py    │ .raw   │  systems run @    │
-   │  Export JSON      │  PNG   │                   │ ─────► │  vsync, on metal  │
-   │                   │  WAV   │  JSON → .bin      │ assets │                   │
+   ┌──────────────────┐        ┌───────────────────┐        ┌──────────────────┐
+   │   WEB EDITOR     │        │     PIPELINE      │        │   PSP ENGINE     │
+   │   (React + TS)   │        │     (Python)      │        │   (C / PSPSDK)   │
+   │                  │        │                   │        │                  │
+   │  Place entities  │ scene  │  magic_bridge.py  │ binary │  scene_parser    │
+   │  Edit components │ .json  │  texture_conv.py  │ blob + │  ECS arrays      │
+   │  Manage assets   │ ─────► │  audio_conv.py    │ .raw   │  systems run @   │
+   │  Export JSON     │  PNG   │                   │ ─────► │  vsync, on metal │
+   │                  │  WAV   │  JSON → .bin      │ assets │                  │
    └──────────────────┘        │  PNG  → .raw      │        └──────────────────┘
-                                │  WAV  → .raw PCM  │              EBOOT.PBP
-                                └──────────────────┘
+                               │  WAV  → .raw PCM  │              EBOOT.PBP
+                               └───────────────────┘
 ```
 
 Why a binary blob? The PSP is a MIPS R4000 with 32 MB of RAM. Parsing JSON on-device
