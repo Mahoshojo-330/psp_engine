@@ -230,12 +230,12 @@ the pipeline packs it, the engine reads it. They must agree, and a test keeps th
 
 ## License
 
-Released under the [MIT License](LICENSE) — free to use, modify, and share.
+Released under the [MIT License](LICENSE)
 
 ---
 
 <div align="center">
 
-*Built with care — and a soft spot for the little handheld that could.* ◆
+*Built with care* ◆
 
 </div>
